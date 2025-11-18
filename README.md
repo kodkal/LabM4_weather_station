@@ -109,7 +109,7 @@ python src/weather_station.py
 SENSOR_TYPE=SIMULATED
 SIMULATION_LOCATION=utah
 ```
-See [Simulation Guide](blob/main/SIMULATION_GUIDE.md) for details.
+See [Simulation Guide](SIMULATION_GUIDE.md) for details.
 
 ### Wiring Diagram - BME280 (I2C)
 ```
