@@ -3,23 +3,543 @@
 
 ---
 
-## Welcome to IoT Security!
+## 📋 Lab Requirements
 
-This project will teach you how to build a secure IoT weather station from the ground up. You'll implement real security controls used in professional IoT deployments while learning practical skills that are directly applicable to industry.
+### What You'll Receive
+- ✅ **Raspberry Pi 4** (Pre-configured with Raspberry Pi OS)
+- ✅ **Network Access** (Ethernet or WiFi credentials)
+- ✅ **Power Supply** for Raspberry Pi
+- ✅ **Lab Time**: 4 weeks to complete
+
+### What You'll Submit
+- 📸 **Screenshots** at each major step (detailed below)
+- 📄 **Security Report** documenting vulnerabilities found and fixed
+- 💾 **Your Code** with security improvements
+- ✅ **Test Results** showing passing security tests
 
 ---
 
-## Table of Contents
-1. [Project Overview](#project-overview)
-2. [Getting Started](#getting-started)
-3. [Hardware Setup](#hardware-setup)
-4. [Software Installation](#software-installation)
-5. [Project Milestones](#project-milestones)
-6. [Security Implementation Guide](#security-implementation-guide)
-7. [Testing Your Implementation](#testing-your-implementation)
-8. [Troubleshooting](#troubleshooting)
-9. [Project Submission](#project-submission)
-10. [Learning Resources](#learning-resources)
+## 🚀 PART 1: Initial Setup (30 minutes)
+
+### Step 1.1: Connect to Your Raspberry Pi
+
+**Take Screenshot #1: SSH Connection**
+
+1. Open Terminal (Mac/Linux) or PowerShell (Windows)
+2. Connect via SSH:
+```bash
+ssh pi@[YOUR_PI_IP_ADDRESS]
+# Example: ssh pi@192.168.1.100
+```
+3. Enter password when prompted (default: `raspberry`)
+4. **📸 Screenshot: Show successful SSH connection with pi@raspberry prompt**
+
+### Step 1.2: Run One-Line Installation
+
+**Take Screenshot #2: Installation Start**
+
+5. Copy and paste this EXACT command:
+```bash
+curl -sSL https://raw.githubusercontent.com/kodkal/LabM4_weather_station/main/install.sh | bash
+```
+6. **📸 Screenshot: Show the installation banner starting**
+7. Wait for installation (5-10 minutes)
+8. **📸 Screenshot #3: Show "Installation Complete! 🎉" message**
+
+### Step 1.3: Student Onboarding (REQUIRED)
+
+**Take Screenshot #4: Onboarding Process**
+
+9. Run the onboarding script:
+```bash
+cd ~/LabM4_weather_station
+./setup/student_onboard.sh
+```
+
+10. Answer the prompts:
+    - **Your Name**: Enter your full name
+    - **Student ID**: Enter your UVU student ID
+    - **Experience Level**: Choose 1 (Beginner), 2 (Intermediate), or 3 (Advanced)
+    - **Mode**: Choose 1 (Simulation Mode) - no hardware needed!
+
+11. **📸 Screenshot #5: Show your personalized welcome message with your name**
+
+### Step 1.4: Verify Installation
+
+**Take Screenshot #6: Installation Verification**
+
+12. Check your profile:
+```bash
+cat .student_profile
+```
+13. **📸 Screenshot: Show your student profile contents**
+
+14. View your quick reference:
+```bash
+cat student_work/quick_reference.txt
+```
+15. **📸 Screenshot #7: Show your personalized quick reference**
+
+---
+
+## 🔬 PART 2: Exploring the System (45 minutes)
+
+### Step 2.1: Start the Weather Station
+
+**Take Screenshot #8: Weather Station Running**
+
+16. Start the application:
+```bash
+./start_weather_station.sh
+```
+17. **📸 Screenshot: Show "Weather Station initialized" message**
+18. Press `Ctrl+C` to stop
+
+### Step 2.2: Test Simulation Mode
+
+**Take Screenshot #9: Simulation Test**
+
+19. Run simulation test:
+```bash
+./test_simulation.sh
+```
+20. **📸 Screenshot: Show "TEST SUITE COMPLETE" with all tests**
+
+### Step 2.3: Initial Security Test
+
+**Take Screenshot #10: Baseline Security Score**
+
+21. Run security test:
+```bash
+./test_security.sh
+```
+22. **📸 Screenshot: Show your initial security score (likely failing)**
+23. **IMPORTANT**: Save this score - you'll compare it later!
+
+---
+
+## 🔍 PART 3: Finding Vulnerabilities (2 hours)
+
+### Step 3.1: Switch to Vulnerable Version
+
+**Take Screenshot #11: Vulnerable Version**
+
+24. Activate vulnerable version:
+```bash
+cd ~/LabM4_weather_station
+python scripts/manage_vulnerabilities.py switch vulnerable
+```
+25. **📸 Screenshot: Show "Switched to VULNERABLE version" message**
+
+### Step 3.2: Search for Hardcoded Credentials
+
+**Take Screenshot #12: Finding Secrets**
+
+26. Search for passwords:
+```bash
+grep -r "password" src/ --include="*.py" | head -10
+```
+27. **📸 Screenshot: Show grep results with hardcoded passwords**
+
+28. Search for API keys:
+```bash
+grep -r "api_key\|secret" src/ --include="*.py" | head -10
+```
+29. **📸 Screenshot #13: Show grep results with API keys/secrets**
+
+### Step 3.3: Test for SQL Injection
+
+**Take Screenshot #14: SQL Injection Test**
+
+30. Start the weather station:
+```bash
+# In Terminal 1
+./start_weather_station.sh
+```
+
+31. In a new terminal (Terminal 2), test SQL injection:
+```bash
+# In Terminal 2 (open new SSH session)
+cd ~/LabM4_weather_station
+curl -X POST http://localhost:8080/api/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "admin'\'' OR '\''1'\''='\''1", "password": "test"}'
+```
+32. **📸 Screenshot: Show the curl command and response**
+
+### Step 3.4: Document Vulnerabilities
+
+**Take Screenshot #15: Progress Tracking**
+
+33. Update your progress file:
+```bash
+nano student_work/progress.md
+```
+34. Add at least 5 vulnerabilities you found:
+```markdown
+## Vulnerabilities Found
+1. ✓ Hardcoded password in weather_station.py line XX
+2. ✓ SQL injection in login endpoint
+3. ✓ API key exposed in source code
+4. ✓ No input validation
+5. ✓ Debug mode enabled in production
+```
+35. **📸 Screenshot: Show your progress.md with vulnerabilities listed**
+
+---
+
+## 🔧 PART 4: Fixing Vulnerabilities (2 hours)
+
+### Step 4.1: Fix Hardcoded Credentials
+
+**Take Screenshot #16: Environment Variables**
+
+36. Edit the main file:
+```bash
+nano src/weather_station.py
+```
+
+37. Find and replace hardcoded values:
+```python
+# BEFORE (BAD):
+API_KEY = "super_secret_api_key_12345"
+
+# AFTER (GOOD):
+import os
+from dotenv import load_dotenv
+load_dotenv()
+API_KEY = os.environ.get('API_KEY')
+```
+38. **📸 Screenshot: Show your code fix for hardcoded credentials**
+
+### Step 4.2: Fix SQL Injection
+
+**Take Screenshot #17: SQL Fix**
+
+39. Find the vulnerable SQL code:
+```bash
+grep -n "SELECT \* FROM users" src/weather_station.py
+```
+
+40. Fix it with parameterized queries:
+```python
+# BEFORE (VULNERABLE):
+query = f"SELECT * FROM users WHERE username='{username}' AND password='{password}'"
+
+# AFTER (SECURE):
+query = "SELECT * FROM users WHERE username=? AND password=?"
+cursor.execute(query, (username, password))
+```
+41. **📸 Screenshot: Show your SQL injection fix**
+
+### Step 4.3: Add Input Validation
+
+**Take Screenshot #18: Input Validation**
+
+42. Add validation function:
+```python
+def validate_input(user_input):
+    # Check for dangerous characters
+    if any(char in user_input for char in ['<', '>', ';', '--', 'script']):
+        return False
+    # Check length
+    if len(user_input) > 255:
+        return False
+    return True
+```
+43. **📸 Screenshot: Show your input validation code**
+
+---
+
+## ✅ PART 5: Testing Your Fixes (1 hour)
+
+### Step 5.1: Run Security Tests Again
+
+**Take Screenshot #19: Improved Score**
+
+44. Test your fixes:
+```bash
+cd ~/LabM4_weather_station
+./test_security.sh
+```
+45. **📸 Screenshot: Show your improved security score**
+
+### Step 5.2: Verify Specific Fixes
+
+**Take Screenshot #20: SQL Injection Prevention**
+
+46. Test SQL injection is fixed:
+```bash
+curl -X POST http://localhost:8080/api/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "admin'\'' OR '\''1'\''='\''1", "password": "test"}'
+```
+47. **📸 Screenshot: Show that SQL injection now fails (401 error)**
+
+### Step 5.3: Final Security Score
+
+**Take Screenshot #21: Final Score**
+
+48. Run final security test:
+```bash
+./test_security.sh | tee final_results.txt
+```
+49. **📸 Screenshot: Show your final security score with grade**
+
+---
+
+## 📊 PART 6: Documentation (1 hour)
+
+### Step 6.1: Create Security Report
+
+**Take Screenshot #22: Security Report**
+
+50. Create your report:
+```bash
+cd ~/LabM4_weather_station/student_work
+nano security_report.md
+```
+
+51. Use this template:
+```markdown
+# Security Assessment Report
+Student: [Your Name]
+Date: [Current Date]
+
+## Executive Summary
+Initial Score: X%
+Final Score: Y%
+Vulnerabilities Fixed: Z
+
+## Vulnerabilities Found and Fixed
+
+### 1. SQL Injection
+- **Location**: src/weather_station.py, line XX
+- **Severity**: Critical
+- **Fix Applied**: Parameterized queries
+- **Test Result**: Passed
+
+### 2. Hardcoded Credentials
+- **Location**: Multiple files
+- **Severity**: High
+- **Fix Applied**: Environment variables
+- **Test Result**: Passed
+
+[Continue for all vulnerabilities...]
+
+## Lessons Learned
+[Your reflection on what you learned]
+```
+52. **📸 Screenshot: Show your completed security report**
+
+---
+
+## 🎯 PART 7: Submission Package
+
+### Step 7.1: Create Submission Archive
+
+**Take Screenshot #23: Submission Package**
+
+53. Create your submission:
+```bash
+cd ~/LabM4_weather_station
+mkdir -p ~/submission_[YourLastName]
+cp -r student_work/* ~/submission_[YourLastName]/
+cp final_results.txt ~/submission_[YourLastName]/
+cp .student_profile ~/submission_[YourLastName]/
+```
+
+54. Create archive:
+```bash
+cd ~
+tar -czf [YourLastName]_Module4_Submission.tar.gz submission_[YourLastName]/
+ls -la [YourLastName]_Module4_Submission.tar.gz
+```
+55. **📸 Screenshot: Show the created submission file with size**
+
+### Step 7.2: Download Your Submission
+
+56. Download to your computer:
+```bash
+# On your computer (not Pi):
+scp pi@[PI_IP]:~/[YourLastName]_Module4_Submission.tar.gz ./
+```
+
+---
+
+## 🔄 PART 8: Reset for Next Student (Instructor Only)
+
+### If You Need to Start Over
+
+57. Reset your environment:
+```bash
+cd ~/LabM4_weather_station/setup
+./reset_lab.sh soft
+```
+
+### Complete Reset (removes everything):
+```bash
+./reset_lab.sh hard
+```
+
+---
+
+## 📸 Screenshot Checklist (23 Total)
+
+### Setup (7 screenshots)
+- [ ] 1. SSH connection successful
+- [ ] 2. Installation starting
+- [ ] 3. Installation complete
+- [ ] 4. Student onboarding process
+- [ ] 5. Personalized welcome message
+- [ ] 6. Student profile contents
+- [ ] 7. Quick reference card
+
+### Exploration (3 screenshots)
+- [ ] 8. Weather station running
+- [ ] 9. Simulation test complete
+- [ ] 10. Initial security score
+
+### Vulnerability Discovery (5 screenshots)
+- [ ] 11. Vulnerable version activated
+- [ ] 12. Hardcoded passwords found
+- [ ] 13. API keys/secrets found
+- [ ] 14. SQL injection test
+- [ ] 15. Progress tracking updated
+
+### Fixing Vulnerabilities (3 screenshots)
+- [ ] 16. Environment variable fix
+- [ ] 17. SQL injection fix
+- [ ] 18. Input validation added
+
+### Testing (3 screenshots)
+- [ ] 19. Improved security score
+- [ ] 20. SQL injection prevented
+- [ ] 21. Final security score
+
+### Documentation (2 screenshots)
+- [ ] 22. Security report completed
+- [ ] 23. Submission package created
+
+---
+
+## 📝 Grading Rubric
+
+### Screenshots (23 points)
+- 1 point per required screenshot
+
+### Security Fixes (40 points)
+- SQL Injection fixed: 10 points
+- Hardcoded credentials removed: 10 points
+- Input validation added: 10 points
+- Additional vulnerabilities fixed: 10 points
+
+### Documentation (20 points)
+- Security report completeness: 10 points
+- Code quality and comments: 10 points
+
+### Testing (17 points)
+- Initial test run: 5 points
+- Final test improvement: 12 points
+
+**Total: 100 points**
+
+### Grade Scale
+- A: 90-100 points
+- B: 80-89 points
+- C: 70-79 points
+- D: 60-69 points
+- F: Below 60 points
+
+---
+
+## ⚠️ Common Issues & Solutions
+
+### Can't SSH to Pi?
+```bash
+# Ask instructor for:
+1. Pi IP address
+2. Password if changed from default
+```
+
+### Installation Failed?
+```bash
+# Try manual installation:
+git clone https://github.com/kodkal/LabM4_weather_station.git
+cd LabM4_weather_station
+./setup/quick_setup.sh
+```
+
+### Security Test Not Working?
+```bash
+# Make sure weather station is running:
+# Terminal 1: ./start_weather_station.sh
+# Terminal 2: ./test_security.sh
+```
+
+### Lost Your Work?
+```bash
+# Your work is saved in:
+cd ~/LabM4_weather_station/student_work/
+ls -la
+```
+
+---
+
+## 🆘 Getting Help
+
+### During Lab Hours
+- Raise your hand for instructor assistance
+- Check with classmates (collaboration is encouraged!)
+- Review the quick reference: `cat student_work/quick_reference.txt`
+
+### Outside Lab Hours
+- Email instructor with:
+  - Your name and student ID
+  - Screenshot of the error
+  - What step you're on
+  - What you've tried
+
+---
+
+## 🏁 Final Checklist Before Submission
+
+- [ ] All 23 screenshots taken and labeled
+- [ ] Security score improved from initial test
+- [ ] At least 5 vulnerabilities fixed
+- [ ] Security report completed
+- [ ] Submission archive created
+- [ ] File downloaded to your computer
+
+---
+
+## 💡 Tips for Success
+
+1. **Take screenshots as you go** - Don't wait until the end!
+2. **Read error messages** - They often tell you exactly what's wrong
+3. **Use the simulation mode** - No hardware needed!
+4. **Test frequently** - Run `./test_security.sh` after each fix
+5. **Document everything** - Update progress.md as you work
+6. **Ask for help** - Don't struggle alone for too long
+
+---
+
+## 🎯 Learning Objectives
+
+By completing this lab, you will:
+- ✅ Understand common IoT security vulnerabilities
+- ✅ Know how to identify security flaws in code
+- ✅ Implement secure coding practices
+- ✅ Test and verify security improvements
+- ✅ Document security assessments professionally
+
+---
+
+**Remember**: The goal is to LEARN about IoT security, not just get a grade. Take time to understand each vulnerability and why the fix works!
+
+---
+
+*Student Guide v2.0 | Module 4 - IoT Security | UVU*
 
 ---
 
