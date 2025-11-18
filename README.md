@@ -180,13 +180,13 @@ pytest tests/test_validation.py
 ## 📚 Documentation
 
 ### For Instructors
-- [Instructor Guide](docs/INSTRUCTOR_GUIDE.md) - Teaching notes, grading rubrics, lab sessions
-- [Implementation Guide](docs/IMPLEMENTATION_GUIDE.md) - Repository setup, deployment options
+- [Instructor Guide](INSTRUCTOR_GUIDE.md) - Teaching notes, grading rubrics, lab sessions
+- [Implementation Guide](IMPLEMENTATION_GUIDE.md) - Repository setup, deployment options
 
 ### For Students
-- [Student Guide](docs/STUDENT_GUIDE.md) - Step-by-step instructions, troubleshooting
-- [Security Design Template](docs/SECURITY_DESIGN.md) - Document template
-- [Threat Model Template](docs/THREAT_MODEL.md) - Threat analysis template
+- [Student Guide](STUDENT_GUIDE.md) - Step-by-step instructions, troubleshooting
+- [Security Design Template](SECURITY_DESIGN.md) - Document template
+- [Threat Model Template](THREAT_MODEL.md) - Threat analysis template
 
 ## 🐛 Troubleshooting
 
