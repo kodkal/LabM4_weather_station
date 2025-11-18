@@ -265,17 +265,6 @@ This project is licensed under the MIT License
 - OWASP IoT Security Project
 - Open source security community
 
-## ⚠️ Security Disclosure
-
-Found a security issue? Please email security@[yourdomain] instead of using the issue tracker.
-
-## 📞 Support
-
-- **Instructor Email**: instructor@uvu.edu
-- **Office Hours**: MW 2-4 PM
-- **Course Forum**: [link]
-- **Slack Channel**: #iot-security
-
 ---
 
 ### ⭐ Star this repository if you find it helpful!
