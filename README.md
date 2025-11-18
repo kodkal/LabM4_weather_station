@@ -31,7 +31,7 @@ A comprehensive IoT security education project for Utah Valley University's IoT 
 #### Option 1: With Physical Sensors
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/secure-weather-station.git
+git clone https://github.com/kodkal/LabM4_weather_station.git
 cd secure-weather-station
 
 # Run automated installation
@@ -49,7 +49,7 @@ python src/weather_station.py
 #### Option 2: Simulation Mode (No Sensors Required!)
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/secure-weather-station.git
+git clone https://github.com/kodkal/LabM4_weather_station.git
 cd secure-weather-station
 
 # Install dependencies
