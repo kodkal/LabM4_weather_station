@@ -1,6 +1,5 @@
 # 🔐 Secure Weather Station - IoT Security Project
 
-[![Security Scan](https://github.com/yourusername/secure-weather-station/actions/workflows/security-scan.yml/badge.svg)](https://github.com/yourusername/secure-weather-station/actions/workflows/security-scan.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![Raspberry Pi](https://img.shields.io/badge/Raspberry%20Pi-4%20%7C%203B%2B-red.svg)](https://www.raspberrypi.org/)
