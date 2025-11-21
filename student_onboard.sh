@@ -284,13 +284,9 @@ echo
 
 echo -e "${YELLOW}Quick Start:${NC}"
 echo "  1. Start the weather station:"
-echo "     ${GREEN}./start_weather_station.sh${NC}"
-echo
-echo "  2. In another terminal, test security:"
-echo "     ${GREEN}./test_security.sh${NC}"
-echo
-echo "  3. View your quick reference:"
-echo "     ${GREEN}cat student_work/quick_reference.txt${NC}"
+echo -e "     ${GREEN}./start_weather_station.sh${NC}"
+echo -e "     ${GREEN}./test_security.sh${NC}"
+echo -e "     ${GREEN}cat student_work/quick_reference.txt${NC}"
 echo
 
 if [ "$LEVEL" == "1" ]; then
