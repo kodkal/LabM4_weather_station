@@ -29,7 +29,7 @@ from flask import Flask, request, jsonify
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from sensor_module import SensorReader
-from config.settings import Settings
+#from config.settings import Settings
 
 # VULN-06: Hardcoded credentials
 API_KEY = "super_secret_api_key_12345"
