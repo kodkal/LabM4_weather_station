@@ -306,10 +306,12 @@ echo -e "${BLUE}Track your progress in:${NC} student_work/progress.md"
 echo
 
 # Test the setup
+# Test the setup
 echo -e "${YELLOW}Testing your setup...${NC}"
-# Create venv if missing
+
+# Ensure virtual environment exists and is activated
 if [ ! -d "venv" ]; then
-    echo "🔧 Creating virtual environment and installing dependencies..."
+    echo "Creating Python virtual environment and installing dependencies..."
     python3 -m venv venv
     source venv/bin/activate
     pip install --upgrade pip
@@ -329,6 +331,7 @@ except Exception as e:
     print(f'⚠️  Sensor test failed: {e}')
     print('   This is OK if you are using simulation mode!')
 " || true
+
 
 echo
 echo -e "${GREEN}Setup complete! Good luck with the lab!${NC}"
