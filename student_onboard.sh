@@ -307,12 +307,17 @@ echo
 
 # Test the setup
 echo -e "${YELLOW}Testing your setup...${NC}"
-# Create virtual environment if it doesn't exist
+# Create venv if missing
 if [ ! -d "venv" ]; then
-    echo "Creating Python virtual environment..."
+    echo "🔧 Creating virtual environment and installing dependencies..."
     python3 -m venv venv
+    source venv/bin/activate
+    pip install --upgrade pip
+    pip install -r requirements.txt
+else
+    source venv/bin/activate
 fi
-source venv/bin/activate
+
 python -c "
 import sys
 sys.path.insert(0, 'src')
