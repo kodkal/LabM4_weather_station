@@ -33,13 +33,51 @@ cat << "EOF"
 EOF
 echo -e "${NC}"
 
-# Get student information
+# Detect platform from PLATFORM_SETUP.md if available
+IS_RASPBERRY_PI=false
+PLATFORM_NAME="Unknown"
+
+if [ -f "$PROJECT_DIR/PLATFORM_SETUP.md" ]; then
+    # Extract platform info from the generated file
+    PLATFORM_LINE=$(grep "^- \*\*Platform:\*\*" "$PROJECT_DIR/PLATFORM_SETUP.md" 2>/dev/null | head -1)
+    if [[ $PLATFORM_LINE == *"Raspberry Pi"* ]]; then
+        IS_RASPBERRY_PI=true
+        PLATFORM_NAME=$(echo "$PLATFORM_LINE" | sed 's/.*Platform:\*\* //' | sed 's/$//')
+    else
+        PLATFORM_NAME=$(echo "$PLATFORM_LINE" | sed 's/.*Platform:\*\* //' | sed 's/$//')
+    fi
+fi
+
+# Fallback: detect directly
+if [ "$PLATFORM_NAME" == "Unknown" ]; then
+    if [ -f /proc/device-tree/model ]; then
+        model=$(cat /proc/device-tree/model)
+        if [[ $model == *"Raspberry Pi"* ]]; then
+            IS_RASPBERRY_PI=true
+            PLATFORM_NAME="$model"
+        fi
+    fi
+    
+    if [ "$PLATFORM_NAME" == "Unknown" ] && [ -f /etc/os-release ]; then
+        . /etc/os-release
+        PLATFORM_NAME="$PRETTY_NAME"
+    fi
+fi
+
+# Welcome message
 echo -e "${YELLOW}Welcome to the Weather Station Security Lab!${NC}"
+echo
+echo -e "${BLUE}Detected Platform:${NC} $PLATFORM_NAME"
+if [ "$IS_RASPBERRY_PI" = true ]; then
+    echo -e "${GREEN}Hardware sensors available${NC}"
+else
+    echo -e "${CYAN}Simulation mode (no hardware needed)${NC}"
+fi
 echo
 echo "Let's personalize your setup..."
 echo
 
-# Get student name
+# Get student information
 read -p "Enter your name (for identification): " STUDENT_NAME
 STUDENT_NAME=${STUDENT_NAME:-"Student"}
 
@@ -61,28 +99,49 @@ case $LEVEL in
     *) LEVEL_NAME="Intermediate" ;;
 esac
 
-# Choose mode
-echo
-echo "How do you want to run the lab?"
-echo "  1) Simulation Mode (no hardware needed)"
-echo "  2) Hardware Mode (I have sensors connected)"
-echo "  3) Auto-detect"
-read -p "Enter choice [1-3]: " MODE
-
-case $MODE in
-    1) 
-        SENSOR_MODE="SIMULATED"
-        MODE_NAME="Simulation"
-        ;;
-    2) 
-        SENSOR_MODE="BME280"
-        MODE_NAME="Hardware"
-        ;;
-    *) 
-        SENSOR_MODE="AUTO"
-        MODE_NAME="Auto-detect"
-        ;;
-esac
+# Sensor mode selection - only ask if on Raspberry Pi
+if [ "$IS_RASPBERRY_PI" = true ]; then
+    echo
+    echo -e "${GREEN}You have a Raspberry Pi!${NC}"
+    echo "How do you want to run the lab?"
+    echo "  1) Simulation Mode (no sensors needed - recommended to start)"
+    echo "  2) Hardware Mode (I have BME280/DHT22 sensor connected)"
+    echo "  3) Try hardware, fallback to simulation if not found"
+    read -p "Enter choice [1-3]: " MODE
+    
+    case $MODE in
+        1) 
+            SENSOR_MODE="SIMULATED"
+            MODE_NAME="Simulation"
+            USE_SIMULATION=true
+            ;;
+        2) 
+            SENSOR_MODE="BME280"
+            MODE_NAME="Hardware (BME280)"
+            USE_SIMULATION=false
+            ;;
+        3) 
+            SENSOR_MODE="AUTO"
+            MODE_NAME="Auto-detect"
+            USE_SIMULATION=false
+            ;;
+        *) 
+            SENSOR_MODE="SIMULATED"
+            MODE_NAME="Simulation"
+            USE_SIMULATION=true
+            ;;
+    esac
+else
+    # Ubuntu/non-RPi - automatically use simulation
+    echo
+    echo -e "${CYAN}Your system will use Simulation Mode${NC}"
+    echo "This is automatic because you don't have Raspberry Pi hardware."
+    echo "You'll still complete all lab objectives!"
+    
+    SENSOR_MODE="SIMULATED"
+    MODE_NAME="Simulation"
+    USE_SIMULATION=true
+fi
 
 # Create student profile
 echo
@@ -97,6 +156,8 @@ STUDENT_NAME="$STUDENT_NAME"
 STUDENT_ID="$STUDENT_ID"
 LEVEL="$LEVEL_NAME"
 MODE="$MODE_NAME"
+PLATFORM="$PLATFORM_NAME"
+IS_RASPBERRY_PI="$IS_RASPBERRY_PI"
 START_DATE="$(date)"
 SENSOR_TYPE="$SENSOR_MODE"
 EOF
@@ -104,16 +165,26 @@ EOF
 # Update .env with student settings
 if [ -f .env ]; then
     # Update sensor type
-    sed -i "s/SENSOR_TYPE=.*/SENSOR_TYPE=$SENSOR_MODE/" .env
+    if grep -q "^SENSOR_TYPE=" .env; then
+        sed -i "s/SENSOR_TYPE=.*/SENSOR_TYPE=$SENSOR_MODE/" .env
+    else
+        echo "SENSOR_TYPE=$SENSOR_MODE" >> .env
+    fi
     
     # Set simulation flag if needed
-    if [ "$SENSOR_MODE" == "SIMULATED" ]; then
+    if [ "$USE_SIMULATION" = true ]; then
         sed -i "s/SENSOR_SIMULATION=.*/SENSOR_SIMULATION=true/" .env
+    else
+        sed -i "s/SENSOR_SIMULATION=.*/SENSOR_SIMULATION=false/" .env
     fi
     
     # Set device ID with student identifier
     DEVICE_ID="weather-$(echo $STUDENT_NAME | tr ' ' '-' | tr '[:upper:]' '[:lower:]')-$(date +%s | tail -c 5)"
-    sed -i "s/DEVICE_ID=.*/DEVICE_ID=$DEVICE_ID/" .env
+    if grep -q "^DEVICE_ID=" .env; then
+        sed -i "s/DEVICE_ID=.*/DEVICE_ID=$DEVICE_ID/" .env
+    else
+        echo "DEVICE_ID=$DEVICE_ID" >> .env
+    fi
 fi
 
 # Create personalized workspace
@@ -129,10 +200,11 @@ This is your personal workspace for the Weather Station Lab.
 - Document your findings
 - Keep your test results
 
-Student: $STUDENT_NAME
-Level: $LEVEL_NAME
-Mode: $MODE_NAME
-Started: $(date)
+**Student:** $STUDENT_NAME
+**Level:** $LEVEL_NAME
+**Mode:** $MODE_NAME
+**Platform:** $PLATFORM_NAME
+**Started:** $(date)
 EOF
 
 # Generate quick reference card
@@ -142,6 +214,7 @@ cat > student_work/quick_reference.txt << EOF
 ========================================
 
 YOUR SETTINGS:
+- Platform: $PLATFORM_NAME
 - Mode: $MODE_NAME
 - Level: $LEVEL_NAME
 - Device ID: $DEVICE_ID
@@ -157,6 +230,9 @@ Test Simulation:
 Run Security Tests:
   ./test_security.sh
 
+Check Your Setup:
+  ./check_environment.sh
+
 Activate Python Environment:
   source venv/bin/activate
 
@@ -169,11 +245,20 @@ Main Code: src/weather_station.py
 Your Work: student_work/
 Config: .env
 Logs: logs/weather_station.log
+Platform Guide: PLATFORM_SETUP.md
+
+API ACCESS:
+----------
+URL: https://localhost:8443
+Default credentials (CHANGE THESE!):
+  Username: admin
+  Password: admin123
 
 HELP:
 ----
+Platform Info: PLATFORM_SETUP.md
 Student Guide: docs/STUDENT_GUIDE.md
-Simulation Guide: docs/SIMULATION_GUIDE.md
+$([ "$IS_RASPBERRY_PI" = false ] && echo "Simulation Guide: docs/SIMULATION_GUIDE.md")
 
 ========================================
 EOF
@@ -184,54 +269,248 @@ echo -e "${BLUE}Configuring for $LEVEL_NAME level...${NC}"
 case $LEVEL in
     1)  # Beginner
         # Enable more logging
-        sed -i "s/LOG_LEVEL=.*/LOG_LEVEL=DEBUG/" .env 2>/dev/null || true
-        sed -i "s/DEBUG=.*/DEBUG=True/" .env 2>/dev/null || true
+        if [ -f .env ]; then
+            sed -i "s/LOG_LEVEL=.*/LOG_LEVEL=DEBUG/" .env 2>/dev/null || true
+            if grep -q "^DEBUG=" .env; then
+                sed -i "s/DEBUG=.*/DEBUG=True/" .env 2>/dev/null || true
+            else
+                echo "DEBUG=True" >> .env
+            fi
+        fi
         
         # Create beginner hints file
         cat > student_work/hints.txt << EOF
-BEGINNER HINTS:
---------------
-1. Start with the simulation mode to understand the system
-2. Look for hardcoded passwords first (grep for "password")
-3. Check the /api/login endpoint for SQL injection
-4. Review the JWT token implementation
-5. Use the test_security.py script to check your progress
+BEGINNER HINTS - Getting Started:
+=================================
 
-Run security tests: python tests/test_security.py
+STEP 1: UNDERSTAND THE SYSTEM
+-----------------------------
+1. Start the weather station: ./start_weather_station.sh
+2. Visit: https://localhost:8443
+3. Try to login (hint: check the code for default credentials)
+4. Explore the API endpoints
+
+STEP 2: FIND VULNERABILITIES
+----------------------------
+Easy ones to find first:
+1. Hardcoded passwords
+   - Search: grep -r "password" src/
+   - Look in: src/weather_station.py
+
+2. SQL Injection
+   - Look at: /api/login endpoint
+   - Try: ' OR '1'='1
+
+3. Weak JWT secrets
+   - Check: .env file
+   - Look for: JWT_SECRET_KEY
+
+4. No rate limiting
+   - Try: Multiple login attempts
+   - Notice: No blocking?
+
+5. Debug mode enabled
+   - Check: .env file
+   - Look for: DEBUG=True
+
+STEP 3: FIX THEM
+---------------
+1. Move passwords to .env file
+2. Use parameterized SQL queries
+3. Generate strong secrets
+4. Add rate limiting
+5. Disable debug in production
+
+STEP 4: TEST
+-----------
+Run: ./test_security.sh
+
+NEED MORE HELP?
+--------------
+- Check docs/ folder for guides
+- Review PLATFORM_SETUP.md
+- Ask your instructor!
+
+Remember: It's okay to ask for help! This is about learning.
 EOF
         ;;
         
     2)  # Intermediate
         # Standard logging
-        sed -i "s/LOG_LEVEL=.*/LOG_LEVEL=INFO/" .env 2>/dev/null || true
+        if [ -f .env ]; then
+            sed -i "s/LOG_LEVEL=.*/LOG_LEVEL=INFO/" .env 2>/dev/null || true
+        fi
         
         cat > student_work/challenges.txt << EOF
 INTERMEDIATE CHALLENGES:
------------------------
+=======================
+
+PRIMARY OBJECTIVES:
+------------------
 1. Find and fix at least 10 security vulnerabilities
 2. Implement proper input validation
 3. Set up secure credential storage
 4. Add rate limiting to the API
 5. Document your threat model
+
+VULNERABILITIES TO FIND:
+-----------------------
+□ Hardcoded credentials
+□ SQL injection
+□ Weak JWT implementation
+□ Missing input validation
+□ No rate limiting
+□ Debug mode enabled
+□ Insecure session management
+□ Missing HTTPS enforcement
+□ Weak password policies
+□ Information disclosure
+□ Missing access controls
+□ CSRF vulnerabilities
+
+SECURITY IMPROVEMENTS:
+---------------------
+1. Input Validation:
+   - Validate all user inputs
+   - Sanitize data before processing
+   - Use allowlists, not blocklists
+
+2. Authentication:
+   - Hash passwords (use bcrypt)
+   - Implement secure session management
+   - Add 2FA (bonus points!)
+
+3. API Security:
+   - Add rate limiting
+   - Implement proper CORS
+   - Use API keys for external access
+
+4. Data Protection:
+   - Encrypt sensitive data at rest
+   - Use TLS for data in transit
+   - Implement proper key management
+
+DOCUMENTATION REQUIRED:
+----------------------
+- Threat model diagram
+- Vulnerability assessment report
+- Remediation plan
+- Security testing results
+
+TESTING:
+-------
+Run comprehensive tests: ./test_security.sh
 EOF
         ;;
         
     3)  # Advanced
         # Minimal logging
-        sed -i "s/LOG_LEVEL=.*/LOG_LEVEL=WARNING/" .env 2>/dev/null || true
-        sed -i "s/DEBUG=.*/DEBUG=False/" .env 2>/dev/null || true
+        if [ -f .env ]; then
+            sed -i "s/LOG_LEVEL=.*/LOG_LEVEL=WARNING/" .env 2>/dev/null || true
+            if grep -q "^DEBUG=" .env; then
+                sed -i "s/DEBUG=.*/DEBUG=False/" .env 2>/dev/null || true
+            else
+                echo "DEBUG=False" >> .env
+            fi
+        fi
         
         cat > student_work/advanced_tasks.txt << EOF
-ADVANCED TASKS:
---------------
-1. Find ALL security vulnerabilities
-2. Implement a complete security audit
-3. Add penetration testing
-4. Create automated security scanning
-5. Build a secure CI/CD pipeline
-6. Implement zero-trust architecture
+ADVANCED TASKS - Security Professional Track:
+=============================================
 
-BONUS: Try to chain vulnerabilities for privilege escalation!
+CORE OBJECTIVES:
+---------------
+1. Perform complete security audit
+2. Find ALL vulnerabilities (15+)
+3. Implement defense-in-depth
+4. Create automated security pipeline
+5. Document enterprise-grade security posture
+
+VULNERABILITY CATEGORIES:
+------------------------
+Authentication & Authorization:
+□ Weak credentials
+□ JWT implementation flaws
+□ Session management issues
+□ Missing RBAC
+□ Privilege escalation vectors
+
+Input Validation:
+□ SQL injection
+□ Command injection
+□ Path traversal
+□ XSS (if web interface exists)
+□ XML/JSON injection
+
+API Security:
+□ No rate limiting
+□ Missing API authentication
+□ CORS misconfiguration
+□ Missing input sanitization
+□ Information disclosure
+
+Cryptography:
+□ Weak encryption
+□ Hardcoded secrets
+□ Insecure random number generation
+□ Missing key rotation
+
+Infrastructure:
+□ Debug mode enabled
+□ Verbose error messages
+□ Missing security headers
+□ Insecure file permissions
+
+ADVANCED CHALLENGES:
+-------------------
+1. Vulnerability Chaining:
+   - Find attack chains for privilege escalation
+   - Document exploitation paths
+   - Create proof-of-concept exploits
+
+2. Security Automation:
+   - Build automated security scanning
+   - Implement CI/CD security gates
+   - Create security monitoring
+
+3. Zero-Trust Architecture:
+   - Implement mutual TLS
+   - Add service mesh
+   - Network segmentation
+
+4. Threat Intelligence:
+   - Create MITRE ATT&CK mapping
+   - Develop detection rules
+   - Build incident response playbook
+
+5. Compliance:
+   - Map to OWASP Top 10
+   - CIS benchmarks alignment
+   - Document security controls
+
+DELIVERABLES:
+------------
+1. Complete security audit report
+2. Penetration testing documentation
+3. Threat model with attack trees
+4. Security automation scripts
+5. Incident response procedures
+6. Compliance mapping document
+
+BONUS CHALLENGES:
+----------------
+□ Implement hardware-based security (TPM)
+□ Add anomaly detection for sensor data
+□ Create honeypot endpoints
+□ Build security dashboard
+□ Implement secure OTA updates
+□ Add blockchain-based audit trail
+
+TESTING:
+-------
+- Automated: ./test_security.sh
+- Manual penetration testing required
+- Document all findings with PoCs
 EOF
         ;;
 esac
@@ -240,30 +519,131 @@ esac
 cat > student_work/progress.md << EOF
 # Progress Tracker - $STUDENT_NAME
 
+**Platform:** $PLATFORM_NAME  
+**Mode:** $MODE_NAME  
+**Level:** $LEVEL_NAME  
+**Started:** $(date)
+
+---
+
 ## Lab Objectives
 - [ ] Environment Setup Complete
 - [ ] Understand the Weather Station Architecture
-- [ ] Run in Simulation Mode
+- [ ] Successfully run in $MODE_NAME mode
 - [ ] Identify Security Vulnerabilities
 - [ ] Fix Critical Vulnerabilities
 - [ ] Implement Security Controls
 - [ ] Pass Security Tests
 - [ ] Complete Documentation
 
+---
+
 ## Vulnerabilities Found
+
+### Critical
 1. [ ] _________________________________
 2. [ ] _________________________________
 3. [ ] _________________________________
+
+### High
 4. [ ] _________________________________
 5. [ ] _________________________________
+6. [ ] _________________________________
 
-## Notes
-_Your notes here_
+### Medium
+7. [ ] _________________________________
+8. [ ] _________________________________
+
+### Low
+9. [ ] _________________________________
+10. [ ] _________________________________
+
+---
+
+## Security Fixes Implemented
+- [ ] _________________________________
+- [ ] _________________________________
+- [ ] _________________________________
+
+---
+
+## Notes & Observations
+_Document your findings, questions, and insights here_
+
+---
 
 ## Test Results
-Date: ________
-Score: _______
-Grade: _______
+
+**Date:** ________  
+**Vulnerabilities Fixed:** ___ / ___  
+**Tests Passed:** ___ / ___  
+**Score:** _______  
+
+---
+
+## Time Log
+- Setup: _______ hours
+- Analysis: _______ hours
+- Implementation: _______ hours
+- Testing: _______ hours
+- Documentation: _______ hours
+
+**Total:** _______ hours
+EOF
+
+# Create security checklist
+cat > student_work/security_checklist.md << EOF
+# Security Checklist - $STUDENT_NAME
+
+## Pre-Analysis
+- [ ] System is running in $MODE_NAME mode
+- [ ] Environment variables reviewed
+- [ ] Code structure understood
+- [ ] API endpoints identified
+
+## Vulnerability Assessment
+### Authentication
+- [ ] Checked for hardcoded credentials
+- [ ] Reviewed password policies
+- [ ] Analyzed session management
+- [ ] Tested JWT implementation
+
+### Input Validation
+- [ ] Tested for SQL injection
+- [ ] Checked for command injection
+- [ ] Verified input sanitization
+- [ ] Tested file upload (if applicable)
+
+### API Security
+- [ ] Checked for rate limiting
+- [ ] Verified CORS configuration
+- [ ] Tested authentication bypasses
+- [ ] Checked for information disclosure
+
+### Cryptography
+- [ ] Reviewed encryption implementation
+- [ ] Checked for weak algorithms
+- [ ] Verified key management
+- [ ] Checked for hardcoded secrets
+
+### Configuration
+- [ ] Reviewed debug settings
+- [ ] Checked file permissions
+- [ ] Verified logging configuration
+- [ ] Reviewed security headers
+
+## Remediation
+- [ ] Documented all findings
+- [ ] Prioritized vulnerabilities
+- [ ] Implemented fixes
+- [ ] Tested fixes
+- [ ] Verified no new issues introduced
+
+## Final Validation
+- [ ] All security tests pass
+- [ ] Documentation complete
+- [ ] Code reviewed
+- [ ] Ready for submission
 EOF
 
 # Display welcome message
@@ -277,64 +657,111 @@ echo -e "${NC}"
 
 echo -e "${CYAN}Your Profile:${NC}"
 echo "  • Name: $STUDENT_NAME"
+if [ -n "$STUDENT_ID" ]; then
+    echo "  • Student ID: $STUDENT_ID"
+fi
 echo "  • Level: $LEVEL_NAME"
+echo "  • Platform: $PLATFORM_NAME"
 echo "  • Mode: $MODE_NAME"
 echo "  • Device ID: $DEVICE_ID"
 echo
 
-echo -e "${YELLOW}Quick Start:${NC}"
-echo "  1. Start the weather station:"
-echo -e "     ${GREEN}./start_weather_station.sh${NC}"
-echo -e "     ${GREEN}./test_security.sh${NC}"
-echo -e "     ${GREEN}cat student_work/quick_reference.txt${NC}"
+echo -e "${YELLOW}═══════════════════════════════════════════════════════════${NC}"
+echo -e "${YELLOW}  Quick Start Commands${NC}"
+echo -e "${YELLOW}═══════════════════════════════════════════════════════════${NC}"
+echo
+echo -e "  ${GREEN}1. Start the weather station:${NC}"
+echo "     ./start_weather_station.sh"
+echo
+echo -e "  ${GREEN}2. Access the API:${NC}"
+echo "     https://localhost:8443"
+echo
+echo -e "  ${GREEN}3. Run security tests:${NC}"
+echo "     ./test_security.sh"
+echo
+echo -e "  ${GREEN}4. View your quick reference:${NC}"
+echo "     cat student_work/quick_reference.txt"
 echo
 
+# Level-specific tips
 if [ "$LEVEL" == "1" ]; then
-    echo -e "${MAGENTA}Beginner Tips:${NC}"
-    echo "  • Start with simulation mode - it's easier!"
-    echo "  • Check student_work/hints.txt for help"
-    echo "  • Use grep to search for passwords"
+    echo -e "${MAGENTA}═══════════════════════════════════════════════════════════${NC}"
+    echo -e "${MAGENTA}  Beginner Tips${NC}"
+    echo -e "${MAGENTA}═══════════════════════════════════════════════════════════${NC}"
+    echo "  • Check student_work/hints.txt for step-by-step help"
+    echo "  • Use 'grep' to search for hardcoded passwords"
+    echo "  • Start with finding obvious vulnerabilities first"
+    echo "  • Don't worry if you get stuck - ask for help!"
+    echo
+elif [ "$LEVEL" == "3" ]; then
+    echo -e "${MAGENTA}═══════════════════════════════════════════════════════════${NC}"
+    echo -e "${MAGENTA}  Advanced Challenge${NC}"
+    echo -e "${MAGENTA}═══════════════════════════════════════════════════════════${NC}"
+    echo "  • See student_work/advanced_tasks.txt for objectives"
+    echo "  • Try to find vulnerability chains"
+    echo "  • Document everything with PoCs"
+    echo "  • Bonus points for going beyond requirements!"
     echo
 fi
 
-echo -e "${BLUE}Your workspace is in:${NC} student_work/"
-echo -e "${BLUE}Track your progress in:${NC} student_work/progress.md"
+echo -e "${BLUE}Your Workspace:${NC}"
+echo "  • Personal workspace: ${GREEN}student_work/${NC}"
+echo "  • Progress tracker: ${GREEN}student_work/progress.md${NC}"
+echo "  • Security checklist: ${GREEN}student_work/security_checklist.md${NC}"
 echo
 
-# Test the setup
+# Platform-specific notes
+if [ "$IS_RASPBERRY_PI" = false ]; then
+    echo -e "${CYAN}═══════════════════════════════════════════════════════════${NC}"
+    echo -e "${CYAN}  Simulation Mode (Ubuntu)${NC}"
+    echo -e "${CYAN}═══════════════════════════════════════════════════════════${NC}"
+    echo "  • You're using simulated sensor data"
+    echo "  • This is perfect for the security lab!"
+    echo "  • All vulnerabilities can be found in simulation mode"
+    echo "  • See PLATFORM_SETUP.md for details"
+    echo
+fi
+
 # Test the setup
 echo -e "${YELLOW}Testing your setup...${NC}"
 
 # Ensure virtual environment exists and is activated
 if [ ! -d "venv" ]; then
-    echo "Creating Python virtual environment and installing dependencies..."
+    echo "  Creating Python virtual environment..."
     python3 -m venv venv
     source venv/bin/activate
-    pip install --upgrade pip
-    pip install -r requirements.txt
+    pip install --upgrade pip > /dev/null 2>&1
+    if [ -f requirements.txt ]; then
+        pip install -r requirements.txt > /dev/null 2>&1
+    fi
 else
     source venv/bin/activate
 fi
 
-python -c "
+# Test imports
+python3 -c "
 import sys
 sys.path.insert(0, 'src')
 try:
     from sensor_module import SensorReader
     sensor = SensorReader(sensor_type='$SENSOR_MODE')
-    print('✅ Sensor module OK')
+    print('  ✅ Sensor module configured for $MODE_NAME mode')
 except Exception as e:
-    print(f'⚠️  Sensor test failed: {e}')
-    print('   This is OK if you are using simulation mode!')
-" || true
-
+    print(f'  ℹ️  Sensor module note: {e}')
+    print('  ℹ️  This is expected if src files are not yet created')
+" 2>/dev/null || echo "  ℹ️  Sensor module will be tested when you start the lab"
 
 echo
-echo -e "${GREEN}Setup complete! Good luck with the lab!${NC}"
+
+echo -e "${GREEN}═══════════════════════════════════════════════════════════${NC}"
+echo -e "${GREEN}  Setup Complete!${NC}"
+echo -e "${GREEN}═══════════════════════════════════════════════════════════${NC}"
 echo
-echo "Remember: The goal is to learn about IoT security, not just to get it working!"
+echo "Remember: The goal is to learn about IoT security!"
 echo "Take your time to understand each vulnerability and its fix."
+echo
+echo "Good luck, $STUDENT_NAME! 🚀"
 echo
 
 # Save setup completion
-echo "$(date): Setup completed for $STUDENT_NAME" >> .setup_log
+echo "$(date): Setup completed for $STUDENT_NAME ($LEVEL_NAME, $MODE_NAME)" >> .setup_log
