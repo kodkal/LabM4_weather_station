@@ -24,7 +24,7 @@ from validation import InputValidator
 from credentials import SecureCredentialStore
 from sensor_module import SensorReader
 # from api.server import create_api_server  # Comment out or remove
-from settings import Settings
+import settings
 
 class SecureWeatherStation:
     """Main weather station application with security controls"""
@@ -32,7 +32,7 @@ class SecureWeatherStation:
     def __init__(self, config_path: str = None):
         """Initialize the secure weather station"""
         # Load configuration
-        self.settings = Settings(config_path)
+        self.settings = settings(config_path)
         
         # Setup secure logging
         self._setup_logging()
