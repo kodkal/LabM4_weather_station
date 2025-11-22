@@ -11,7 +11,9 @@ import json
 from datetime import datetime
 
 # Add project root to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+#sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+project_root = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, project_root)
 
 # Force simulation mode for this test
 os.environ['SENSOR_SIMULATION'] = 'true'
