@@ -20,8 +20,8 @@ os.environ['SENSOR_SIMULATION'] = 'true'
 os.environ['DEBUG'] = 'true'
 
 from sensor_module import SensorReader, WeatherPattern
-from src.security.encryption import SecureDataTransmission
-from src.security.validation import InputValidator, DataType
+from encryption import SecureDataTransmission
+from validation import InputValidator, DataType
 
 def print_header(title):
     """Print formatted header"""
