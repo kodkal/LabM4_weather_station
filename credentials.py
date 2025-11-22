@@ -9,13 +9,13 @@ import base64
 import secrets
 import hashlib
 import sqlite3
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, Optional, List, Tuple
 from datetime import datetime, timezone, timedelta
 import logging
 from pathlib import Path
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.backends import default_backend
 import argon2
 
@@ -700,7 +700,7 @@ class SecureCredentialStore:
         """
         try:
             # Derive key from password
-            kdf = PBKDF2(
+            kdf = PBKDF2HMAC(
                 algorithm=hashes.SHA256(),
                 length=32,
                 salt=os.urandom(16),
