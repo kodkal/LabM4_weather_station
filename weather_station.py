@@ -18,16 +18,13 @@ import threading
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from security.auth import JWTManager
-from security.encryption import SecureDataTransmission
-from security.validation import InputValidator
-from security.credentials import SecureCredentialStore
+from auth import JWTManager
+from encryption import SecureDataTransmission
+from validation import InputValidator
+from credentials import SecureCredentialStore
 from sensor_module import SensorReader
-from api.server import create_api_server
-from config.settings import Settings
-
-# Configure secure logging
-from pythonjsonlogger import jsonlogger
+# from api.server import create_api_server  # Comment out or remove
+from settings import Settings
 
 class SecureWeatherStation:
     """Main weather station application with security controls"""
