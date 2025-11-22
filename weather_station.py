@@ -32,7 +32,7 @@ class SecureWeatherStation:
     def __init__(self, config_path: str = None):
         """Initialize the secure weather station"""
         # Load configuration
-        self.settings = self.settings(config_path)
+        self.settings = settings
         
         # Setup secure logging
         self._setup_logging()
