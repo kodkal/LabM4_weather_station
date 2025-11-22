@@ -45,10 +45,15 @@ class SecureWeatherStation:
         self._initialize_security()
         
         # Initialize sensor
-        self.sensor_reader = SensorReader(
+        # If simulation, don't pass gpio_pin
+        if self.settings.SENSOR_SIMULATION or self.settings.SENSOR_TYPE == 'SIMULATED':
+            self.sensor_reader = SensorReader(sensor_type='SIMULATED')
+        else:
+            self.sensor_reader = SensorReader(
             sensor_type=self.settings.SENSOR_TYPE,
             gpio_pin=self.settings.SENSOR_PIN
         )
+
         
         # Initialize data storage
         self.data_buffer: List[Dict] = []
