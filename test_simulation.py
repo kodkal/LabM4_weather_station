@@ -19,9 +19,9 @@ sys.path.insert(0, project_root)
 os.environ['SENSOR_SIMULATION'] = 'true'
 os.environ['DEBUG'] = 'true'
 
-from src.sensor_module import SensorReader, WeatherPattern
-from src.security.encryption import SecureDataTransmission
-from src.security.validation import InputValidator, DataType
+from sensor_module import SensorReader, WeatherPattern
+from security.encryption import SecureDataTransmission
+from security.validation import InputValidator, DataType
 
 def print_header(title):
     """Print formatted header"""
