@@ -199,7 +199,7 @@ class SecurityTester:
         
         try:
             # Read the main file
-            with open('src/weather_station.py', 'r') as f:
+            with open('weather_station.py', 'r') as f:
                 content = f.read()
                 
             for pattern in hardcoded_patterns:
@@ -342,7 +342,7 @@ class SecurityTester:
         weak_patterns = ['rot13', 'rot_13', 'base64', 'md5', 'MD5']
         
         try:
-            with open('src/weather_station.py', 'r') as f:
+            with open('weather_station.py', 'r') as f:
                 content = f.read()
                 
             for pattern in weak_patterns:
@@ -577,7 +577,7 @@ def main():
     except:
         print(f"{Fore.RED}✗ Server not responding at {args.url}{Style.RESET_ALL}")
         print("\nPlease start the weather station first:")
-        print("  python src/weather_station.py")
+        print("  python weather_station.py")
         sys.exit(1)
     
     # Run tests

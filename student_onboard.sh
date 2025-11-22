@@ -241,7 +241,7 @@ View Your Profile:
 
 IMPORTANT FILES:
 ---------------
-Main Code: src/weather_station.py
+Main Code: weather_station.py
 Your Work: student_work/
 Config: .env
 Logs: logs/weather_station.log
@@ -295,7 +295,7 @@ STEP 2: FIND VULNERABILITIES
 Easy ones to find first:
 1. Hardcoded passwords
    - Search: grep -r "password" src/
-   - Look in: src/weather_station.py
+   - Look in: weather_station.py
 
 2. SQL Injection
    - Look at: /api/login endpoint

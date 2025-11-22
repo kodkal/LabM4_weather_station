@@ -137,13 +137,13 @@ python scripts/manage_vulnerabilities.py switch vulnerable
 
 26. Search for passwords:
 ```bash
-grep -r "password" src/ --include="*.py" | head -10
+grep -r "password" --include="*.py" | head -10
 ```
 27. **📸 Screenshot: Show grep results with hardcoded passwords**
 
 28. Search for API keys:
 ```bash
-grep -r "api_key\|secret" src/ --include="*.py" | head -10
+grep -r "api_key\|secret" --include="*.py" | head -10
 ```
 29. **📸 Screenshot #13: Show grep results with API keys/secrets**
 
@@ -196,7 +196,7 @@ nano student_work/progress.md
 
 36. Edit the main file:
 ```bash
-nano src/weather_station.py
+nano weather_station.py
 ```
 
 37. Find and replace hardcoded values:
@@ -218,7 +218,7 @@ API_KEY = os.environ.get('API_KEY')
 
 39. Find the vulnerable SQL code:
 ```bash
-grep -n "SELECT \* FROM users" src/weather_station.py
+grep -n "SELECT \* FROM users" weather_station.py
 ```
 
 40. Fix it with parameterized queries:
@@ -314,7 +314,7 @@ Vulnerabilities Fixed: Z
 ## Vulnerabilities Found and Fixed
 
 ### 1. SQL Injection
-- **Location**: src/weather_station.py, line XX
+- **Location**: weather_station.py, line XX
 - **Severity**: Critical
 - **Fix Applied**: Parameterized queries
 - **Test Result**: Passed
@@ -1086,11 +1086,10 @@ logger.debug(f"Validation result: {is_valid}")
 Your GitHub repository should include:
 ```
 secure-weather-station/
-├── src/                    # All source code
-│   ├── weather_station.py  # Main application
-│   ├── sensor_module.py    # Sensor interface
-│   ├── security/           # Security modules
-│   └── api/               # API implementation
+├── weather_station.py  # Main application
+├── sensor_module.py    # Sensor interface
+├── security/           # Security modules
+└── api/               # API implementation
 ├── tests/                 # Test files
 ├── docs/                  # Documentation
 │   ├── SECURITY_DESIGN.md # Your security design

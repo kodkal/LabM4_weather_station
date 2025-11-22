@@ -228,12 +228,12 @@ cd ~/LabM4_weather_station
 ```bash
 cd ~/LabM4_weather_station
 source venv/bin/activate
-python src/weather_station.py
+python weather_station.py
 ```
 
 ### 5.3 Run in Background
 ```bash
-nohup python src/weather_station.py > weather.log 2>&1 &
+nohup python weather_station.py > weather.log 2>&1 &
 ```
 
 ### 5.4 Run as Service
@@ -253,7 +253,7 @@ Type=simple
 User=pi
 WorkingDirectory=/home/pi/LabM4_weather_station
 Environment="PATH=/home/pi/LabM4_weather_station/venv/bin"
-ExecStart=/home/pi/LabM4_weather_station/venv/bin/python /home/pi/LabM4_weather_station/src/weather_station.py
+ExecStart=/home/pi/LabM4_weather_station/venv/bin/python /home/pi/LabM4_weather_station/weather_station.py
 Restart=on-failure
 
 [Install]
@@ -346,7 +346,7 @@ tail -f logs/weather_station.log
 sudo journalctl -u weather-station -f
 
 # Python errors
-python src/weather_station.py 2>&1 | tee debug.log
+python weather_station.py 2>&1 | tee debug.log
 ```
 
 ### 6.3 Testing Components
@@ -373,7 +373,7 @@ print('Token generated successfully')
 #### Test API
 ```bash
 # Start application in one terminal
-python src/weather_station.py
+python weather_station.py
 
 # Test in another terminal
 curl -X POST http://localhost:8080/api/login \
@@ -423,7 +423,7 @@ python -c "from src.sensor_module import SensorReader; print('✓ Installation O
 python tests/test_security.py
 
 # Check for hardcoded secrets
-grep -r "password\|secret\|api_key" src/ --include="*.py"
+grep -r "password\|secret\|api_key" --include="*.py"
 ```
 
 ---

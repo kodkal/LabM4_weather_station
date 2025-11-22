@@ -229,7 +229,7 @@ Students work on the lab:
 ```bash
 # Students can backup their work
 cd ~/LabM4_weather_station
-tar -czf ~/my_work.tar.gz student_work/ src/
+tar -czf ~/my_work.tar.gz student_work/
 
 # Instructor resets
 ./setup/reset_lab.sh soft

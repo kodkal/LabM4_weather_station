@@ -13,20 +13,19 @@ secure-weather-station/
 │   └── ISSUE_TEMPLATE/
 │       ├── bug_report.md
 │       └── security_vulnerability.md
-├── src/                            # Source code
-│   ├── weather_station.py         # Main application
-│   ├── sensor_module.py           # Sensor interfaces
-│   ├── security/                  # Security modules
-│   │   ├── __init__.py
-│   │   ├── auth.py               # JWT authentication
-│   │   ├── encryption.py         # Data encryption
-│   │   ├── validation.py         # Input validation
-│   │   └── credentials.py        # Secure storage
-│   ├── api/                      # API implementation
-│   │   ├── __init__.py
-│   │   ├── server.py
-│   │   └── routes.py
-│   └── config/                   # Configuration
+├── weather_station.py         # Main application
+├── sensor_module.py           # Sensor interfaces
+├── security/                  # Security modules
+│   ├── __init__.py
+│   ├── auth.py               # JWT authentication
+│   ├── encryption.py         # Data encryption
+│   ├── validation.py         # Input validation
+│   └── credentials.py        # Secure storage
+├── api/                      # API implementation
+│   ├── __init__.py
+│   ├── server.py
+│   └── routes.py
+└── config/                   # Configuration
 │       ├── __init__.py
 │       └── settings.py
 ├── setup/                        # Setup scripts
@@ -188,7 +187,7 @@ echo ""
 echo "Next steps:"
 echo "1. Connect your sensor hardware"
 echo "2. Configure settings in config/settings.py"
-echo "3. Test with: python src/weather_station.py"
+echo "3. Test with: python weather_station.py"
 echo "4. Start service: sudo systemctl start weather-station"
 echo ""
 ```
@@ -346,7 +345,7 @@ Type=simple
 User=$USER
 WorkingDirectory=$PROJECT_DIR
 Environment="PATH=$PROJECT_DIR/venv/bin"
-ExecStart=$PROJECT_DIR/venv/bin/python $PROJECT_DIR/src/weather_station.py
+ExecStart=$PROJECT_DIR/venv/bin/python $PROJECT_DIR/weather_station.py
 Restart=on-failure
 RestartSec=10
 
@@ -407,7 +406,7 @@ USER weather
 EXPOSE 8443
 
 # Run the application
-CMD ["python", "src/weather_station.py"]
+CMD ["python", "weather_station.py"]
 ```
 
 ```yaml
@@ -463,7 +462,7 @@ watchmedo auto-restart \
     --patterns="*.py" \
     --recursive \
     --signal SIGTERM \
-    python src/weather_station.py
+    python weather_station.py
 ```
 
 ---

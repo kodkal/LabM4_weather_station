@@ -21,7 +21,7 @@ The Secure Weather Station includes a comprehensive simulation mode that allows 
 export SENSOR_SIMULATION=true
 
 # Run the weather station
-python src/weather_station.py
+python weather_station.py
 ```
 
 ### Option 2: Configuration File
@@ -119,13 +119,13 @@ if sensor.is_simulated:
 ### 1. Normal Operation
 ```bash
 # Standard weather simulation
-SENSOR_TYPE=SIMULATED python src/weather_station.py
+SENSOR_TYPE=SIMULATED python weather_station.py
 ```
 
 ### 2. Testing Anomaly Detection
 ```bash
 # Enable anomalies to test your detection code
-SENSOR_SIMULATION=true SIMULATION_ANOMALIES=true python src/weather_station.py
+SENSOR_SIMULATION=true SIMULATION_ANOMALIES=true python weather_station.py
 ```
 
 ### 3. Specific Weather Patterns
@@ -173,7 +173,7 @@ pip install flask flask-cors pyjwt cryptography python-dotenv
 # 4. Run in simulation mode
 export SENSOR_SIMULATION=true
 export DEBUG=true
-python src/weather_station.py
+python weather_station.py
 
 # 5. Access API at https://localhost:8443
 ```
@@ -219,7 +219,7 @@ echo "SIMULATION_LOCATION=utah" >> .env
 ### 2. Testing at Home
 ```bash
 # Develop on your laptop before deploying to Pi
-SENSOR_SIMULATION=true python src/weather_station.py
+SENSOR_SIMULATION=true python weather_station.py
 ```
 
 ### 3. Demonstrating Security Vulnerabilities

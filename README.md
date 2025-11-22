@@ -43,7 +43,7 @@ cp .env.example .env
 nano .env  # Set SENSOR_TYPE=AUTO
 
 # Run the weather station
-python src/weather_station.py
+python weather_station.py
 ```
 
 #### Option 2: Simulation Mode (No Sensors Required!)
@@ -59,7 +59,7 @@ pip install -r requirements.txt
 export SENSOR_SIMULATION=true
 
 # Run the weather station
-python src/weather_station.py
+python weather_station.py
 
 # Test simulation features
 python scripts/test_simulation.py
@@ -69,11 +69,10 @@ python scripts/test_simulation.py
 
 ```
 secure-weather-station/
-├── src/                    # Source code
-│   ├── weather_station.py  # Main application
-│   ├── sensor_module.py    # Sensor interfaces
-│   ├── security/           # Security modules (auth, encryption, validation)
-│   └── api/               # RESTful API implementation
+├── weather_station.py  # Main application
+├── sensor_module.py    # Sensor interfaces
+├── security/           # Security modules (auth, encryption, validation)
+└── api/               # RESTful API implementation
 ├── docs/                  # Documentation
 │   ├── INSTRUCTOR_GUIDE.md
 │   ├── STUDENT_GUIDE.md
@@ -103,7 +102,7 @@ secure-weather-station/
 ```bash
 # Run without any sensors - perfect for development and learning
 export SENSOR_SIMULATION=true
-python src/weather_station.py
+python weather_station.py
 
 # Or configure in .env file
 SENSOR_TYPE=SIMULATED
@@ -215,7 +214,7 @@ pip install -r requirements-dev.txt
 
 # Run in development mode
 export DEBUG=True
-python src/weather_station.py
+python weather_station.py
 ```
 
 ## 📈 Project Timeline

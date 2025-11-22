@@ -257,7 +257,6 @@ backup_student_work() {
     # Create backup
     tar -czf "$BACKUP_FILE" \
         -C "$PROJECT_DIR" \
-        src/ \
         logs/ \
         data/ \
         .env \

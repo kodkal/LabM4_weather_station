@@ -97,7 +97,7 @@ Or manually:
 ```bash
 cd ~/LabM4_weather_station
 source venv/bin/activate
-python src/weather_station.py
+python weather_station.py
 ```
 
 ---
@@ -254,7 +254,7 @@ pip install -r requirements.txt
 ```bash
 # Use simulation mode - no sensors needed!
 export SENSOR_SIMULATION=true
-python src/weather_station.py
+python weather_station.py
 ```
 
 ---

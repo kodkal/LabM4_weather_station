@@ -350,7 +350,7 @@ except ImportError as e:
     export SENSOR_SIMULATION=true
     
     # Create a simple test if the module doesn't exist
-    if [ -f src/sensor_module.py ]; then
+    if [ -f sensor_module.py ]; then
         python3 -c "
 import sys
 sys.path.insert(0, 'src')
@@ -410,7 +410,7 @@ echo "Press Ctrl+C to stop"
 echo ""
 
 # Start the weather station
-python src/weather_station.py
+python weather_station.py
 EOF
     chmod +x "start_weather_station.sh"
     
