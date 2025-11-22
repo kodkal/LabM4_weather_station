@@ -23,6 +23,10 @@ from encryption import SecureDataTransmission
 from validation import InputValidator
 from credentials import SecureCredentialStore
 from sensor_module import SensorReader
+from logging.handlers import RotatingFileHandler
+from pythonjsonlogger import jsonlogger
+
+
 # from api.server import create_api_server  # Comment out or remove
 import settings
 
@@ -67,7 +71,7 @@ class SecureWeatherStation:
         os.makedirs('logs', exist_ok=True)
         
         # Setup JSON logging for security events
-        logHandler = logging.handlers.RotatingFileHandler(
+        logHandler = RotatingFileHandler(
             'logs/weather_station.log',
             maxBytes=10485760,  # 10MB
             backupCount=5
