@@ -166,10 +166,30 @@ setup_python_env() {
     # Upgrade pip
     pip install --upgrade pip > /dev/null 2>&1
     
-    # Install requirements
+    # Install requirements based on platform
     if [ -f requirements.txt ]; then
         print_status "Installing Python packages..."
-        pip install -r requirements.txt > /dev/null 2>&1
+        
+        if [ "$IS_RASPBERRY_PI" = true ]; then
+            # On Raspberry Pi: Install all packages
+            if [ -f requirements-rpi.txt ]; then
+                print_status "Installing core + hardware support packages..."
+                pip install -r requirements.txt > /dev/null 2>&1
+                pip install -r requirements-rpi.txt > /dev/null 2>&1 || print_warning "Some RPi packages failed (may need manual sensor installation)"
+            else
+                pip install -r requirements.txt > /dev/null 2>&1
+            fi
+        else
+            # On Ubuntu/non-RPi: Skip Raspberry Pi specific packages
+            print_status "Installing core packages (skipping RPi hardware support)..."
+            
+            # Filter out RPi-specific packages
+            grep -v -E "RPi\.GPIO|adafruit-circuitpython-bme280|adafruit-circuitpython-dht" requirements.txt > requirements-temp.txt 2>/dev/null || cp requirements.txt requirements-temp.txt
+            
+            pip install -r requirements-temp.txt > /dev/null 2>&1
+            rm -f requirements-temp.txt
+        fi
+        
         print_success "Python packages installed"
     else
         print_warning "requirements.txt not found - installing basic packages"
@@ -350,7 +370,7 @@ except ImportError as e:
     export SENSOR_SIMULATION=true
     
     # Create a simple test if the module doesn't exist
-    if [ -f sensor_module.py ]; then
+    if [ -f src/sensor_module.py ]; then
         python3 -c "
 import sys
 sys.path.insert(0, 'src')
@@ -387,31 +407,48 @@ create_helper_scripts() {
     fi
     
     # Create start script
-    cat > "start_weather_station.sh" << EOF
+    cat > "start_weather_station.sh" << 'STARTSCRIPT'
 #!/bin/bash
 # Start Weather Station
-cd "\$(dirname "\$0")"
+cd "$(dirname "$0")"
 source venv/bin/activate
 
-# Load environment variables
+# Load environment variables from .env file (properly handle quotes and comments)
 if [ -f .env ]; then
-    export \$(cat .env | grep -v '^#' | xargs)
+    set -a  # Automatically export all variables
+    while IFS= read -r line || [ -n "$line" ]; do
+        # Skip empty lines and comments
+        [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]] && continue
+        
+        # Remove inline comments
+        line="${line%%#*}"
+        
+        # Trim whitespace
+        line="$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+        
+        # Skip if empty after trimming
+        [[ -z "$line" ]] && continue
+        
+        # Export the variable
+        export "$line"
+    done < .env
+    set +a
 fi
 
 echo "======================================"
 echo "  Weather Station - Starting"
 echo "======================================"
-echo "Platform: $PLATFORM_NAME"
-echo "Simulation Mode: \${SENSOR_SIMULATION:-$sim_mode}"
-echo "API URL: https://localhost:\${API_PORT:-8443}"
+echo "Platform: $(lsb_release -d 2>/dev/null | cut -f2- || uname -s)"
+echo "Simulation Mode: ${SENSOR_SIMULATION:-auto}"
+echo "API URL: https://localhost:${API_PORT:-8443}"
 echo "======================================"
 echo ""
 echo "Press Ctrl+C to stop"
 echo ""
 
 # Start the weather station
-python weather_station.py
-EOF
+python src/weather_station.py
+STARTSCRIPT
     chmod +x "start_weather_station.sh"
     
     # Create simulation test script

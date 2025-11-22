@@ -1,0 +1,19 @@
+# ============================================================
+# Raspberry Pi Hardware Support
+# Only install on Raspberry Pi if using real sensors
+# ============================================================
+#
+# Installation on Raspberry Pi:
+#   pip install -r requirements.txt -r requirements-rpi.txt
+#
+# These packages will FAIL on Ubuntu/non-RPi systems!
+# ============================================================
+
+# Sensor libraries for Raspberry Pi hardware
+adafruit-circuitpython-bme280==2.6.24
+adafruit-circuitpython-dht==4.0.4
+RPi.GPIO==0.7.1
+
+# Note: The weather station will work in simulation mode
+# without these packages. They are only needed for actual
+# sensor hardware on Raspberry Pi.

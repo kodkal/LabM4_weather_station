@@ -1,44 +1,53 @@
-# Core dependencies
+# Core dependencies (required on all platforms)
 Flask==2.3.3
 flask-cors==4.0.0
 flask-limiter==3.5.0
 
-# Security libraries
+# Security libraries (required)
 PyJWT==2.8.0
 cryptography==41.0.7
 python-dotenv==1.0.0
 argon2-cffi==23.1.0
 
-# Sensor libraries
-adafruit-circuitpython-bme280==2.6.24
-adafruit-circuitpython-dht==4.0.4
-RPi.GPIO==0.7.1
-
-# Data handling
+# Data handling (required)
 pydantic==2.5.0
 python-json-logger==2.0.7
 
-# Testing
+# Testing (required)
 pytest==7.4.3
 pytest-cov==4.1.0
 requests==2.31.0
 
-# Monitoring and logging
+# Monitoring and logging (required)
 prometheus-client==0.19.0
 colorlog==6.8.0
 
-# Certificate management
+# Certificate management (required)
 pyOpenSSL==23.3.0
 certifi==2023.11.17
 
-# Database for credential storage
+# Database for credential storage (required)
 sqlalchemy==2.0.23
 alembic==1.13.0
 
-# Rate limiting and security
+# Rate limiting and security (required)
 redis==5.0.1
 slowapi==0.1.9
 
-# Validation
+# Validation (required)
 validators==0.22.0
 marshmallow==3.20.1
+
+# ============================================================
+# Raspberry Pi Hardware Support (OPTIONAL)
+# These packages are only needed if using real sensors
+# They will fail to install on non-Raspberry Pi systems
+# 
+# To install on Raspberry Pi with hardware support:
+#   pip install -r requirements.txt -r requirements-rpi.txt
+# ============================================================
+# 
+# NOT included here (see requirements-rpi.txt):
+# - adafruit-circuitpython-bme280
+# - adafruit-circuitpython-dht
+# - RPi.GPIO
