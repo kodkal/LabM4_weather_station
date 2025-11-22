@@ -380,43 +380,64 @@ class SecureWeatherStation:
                             extra={"event": "backup_error"})
     
     def start(self):
-        """Start the weather station"""
+        """Start the weather station (no API server in this build)."""
         self.logger.info("Starting Secure Weather Station")
         
-        # Verify secure boot
+        # Secure boot verification
         if not self.verify_secure_boot():
             self.logger.error("Secure boot verification failed. Exiting.")
             if not self.settings.DEBUG:
                 sys.exit(1)
-        
-        # Start data collection thread
+
+        # Start data collection
         self.running = True
         self.data_thread = threading.Thread(target=self.data_collection_loop)
         self.data_thread.daemon = True
         self.data_thread.start()
-        
-        # Start API server
-        api_app = create_api_server(self)
-        
+
+        # Keep the main thread alive
         try:
-            # Run with TLS if certificates are available
-            if os.path.exists(self.settings.CERT_FILE):
-                api_app.run(
-                    host='0.0.0.0',
-                    port=self.settings.API_PORT,
-                    ssl_context=(self.settings.CERT_FILE, self.settings.PRIVATE_KEY_FILE),
-                    debug=False
-                )
-            else:
-                self.logger.warning("Running API without TLS - development only!")
-                api_app.run(
-                    host='0.0.0.0',
-                    port=self.settings.API_PORT,
-                    debug=self.settings.DEBUG
-                )
-        except Exception as e:
-            self.logger.error(f"Failed to start API server: {e}")
-            self.stop()
+            while self.running:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            self._signal_handler(signal.SIGINT, None)
+            """Start the weather station"""
+            self.logger.info("Starting Secure Weather Station")
+            
+            # Verify secure boot
+            if not self.verify_secure_boot():
+                self.logger.error("Secure boot verification failed. Exiting.")
+                if not self.settings.DEBUG:
+                    sys.exit(1)
+            
+            # Start data collection thread
+            self.running = True
+            self.data_thread = threading.Thread(target=self.data_collection_loop)
+            self.data_thread.daemon = True
+            self.data_thread.start()
+            
+            # Start API server
+            api_app = create_api_server(self)
+            
+            try:
+                # Run with TLS if certificates are available
+                if os.path.exists(self.settings.CERT_FILE):
+                    api_app.run(
+                        host='0.0.0.0',
+                        port=self.settings.API_PORT,
+                        ssl_context=(self.settings.CERT_FILE, self.settings.PRIVATE_KEY_FILE),
+                        debug=False
+                    )
+                else:
+                    self.logger.warning("Running API without TLS - development only!")
+                    api_app.run(
+                        host='0.0.0.0',
+                        port=self.settings.API_PORT,
+                        debug=self.settings.DEBUG
+                    )
+            except Exception as e:
+                self.logger.error(f"Failed to start API server: {e}")
+                self.stop()
     
     def stop(self):
         """Stop the weather station"""
