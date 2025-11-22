@@ -447,7 +447,7 @@ echo "Press Ctrl+C to stop"
 echo ""
 
 # Start the weather station
-python weather_station.py
+python vulnerable_weather_station.py
 STARTSCRIPT
     chmod +x "start_weather_station.sh"
     
