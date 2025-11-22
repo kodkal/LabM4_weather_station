@@ -31,7 +31,7 @@ Then try: `./start_weather_station.sh` again
 ```bash
 cd ~/LabM4_weather_station
 export SENSOR_SIMULATION=true
-python src/weather_station.py
+python weather_station.py
 ```
 
 ---
@@ -137,7 +137,7 @@ nano student_work/progress.md
 
 | File | What It Is |
 |------|-----------|
-| `src/weather_station.py` | Main application code |
+| `weather_station.py` | Main application code |
 | `.env` | Configuration (secrets here!) |
 | `student_work/` | Your personal workspace |
 | `logs/weather_station.log` | Application logs |
@@ -168,7 +168,7 @@ sudo kill <PID>
 ```
 
 **Q: Where do I find the vulnerabilities?**  
-A: Start in `src/weather_station.py` and look for:
+A: Start in `weather_station.py` and look for:
 - Hardcoded passwords
 - SQL queries that might be injectable
 - Weak encryption/secrets

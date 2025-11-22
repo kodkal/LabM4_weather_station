@@ -85,7 +85,7 @@ echo "Press Ctrl+C to stop"
 echo ""
 
 # Start the weather station
-python src/weather_station.py
+python weather_station.py
 STARTSCRIPT
 
 chmod +x start_weather_station.sh
