@@ -241,7 +241,7 @@ hard_reset() {
     print_success "Hard reset complete! All project files removed."
     echo
     echo -e "${YELLOW}To reinstall, run:${NC}"
-    echo "  curl -sSL https://raw.githubusercontent.com/kodkal/LabM4_weather_station/main/setup/quick_setup.sh | bash"
+    echo "  curl -sSL https://raw.githubusercontent.com/kodkal/LabM4_weather_station/main/quick_setup.sh | bash"
 }
 
 # Backup student work

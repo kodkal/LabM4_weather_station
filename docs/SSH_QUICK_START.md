@@ -61,12 +61,12 @@ If SSH is not enabled on your Pi:
 Once you're connected via SSH, run this single command to set up everything:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/kodkal/LabM4_weather_station/main/setup/quick_setup.sh | bash
+curl -sSL https://raw.githubusercontent.com/kodkal/LabM4_weather_station/main/quick_setup.sh | bash
 ```
 
 **Alternative (if curl fails):**
 ```bash
-wget -qO- https://raw.githubusercontent.com/kodkal/LabM4_weather_station/main/setup/quick_setup.sh | bash
+wget -qO- https://raw.githubusercontent.com/kodkal/LabM4_weather_station/main/quick_setup.sh | bash
 ```
 
 This command will:
@@ -226,7 +226,7 @@ PI_IPS="192.168.1.101 192.168.1.102 192.168.1.103"
 
 for IP in $PI_IPS; do
     echo "Setting up Pi at $IP..."
-    ssh pi@$IP "curl -sSL https://raw.githubusercontent.com/kodkal/LabM4_weather_station/main/setup/quick_setup.sh | bash"
+    ssh pi@$IP "curl -sSL https://raw.githubusercontent.com/kodkal/LabM4_weather_station/main/quick_setup.sh | bash"
 done
 ```
 

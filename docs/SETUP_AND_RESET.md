@@ -247,7 +247,7 @@ ping -c 3 github.com
 # Try manual clone
 git clone https://github.com/kodkal/LabM4_weather_station.git
 cd LabM4_weather_station
-./setup/quick_setup.sh
+./quick_setup.sh
 ```
 
 ### Reset Script Fails
