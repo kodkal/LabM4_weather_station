@@ -82,7 +82,7 @@ check_platform() {
     print_info "Hardware sensor support: DISABLED (will use simulation mode)"
     print_info "This is normal for Ubuntu/non-RPi systems"
     
-    return 1
+    return 0
 }
 
 # Step 1: System Update
