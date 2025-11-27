@@ -7,6 +7,9 @@ which provides temperature, humidity, and pressure readings.
 
 AHT20: Temperature + Humidity (I2C address 0x38)
 BMP280: Temperature + Pressure (I2C address 0x76 or 0x77)
+
+Note: Some combo boards only have the AHT20 working. This module
+handles that gracefully and will still provide temp/humidity data.
 """
 
 import time
@@ -48,7 +51,7 @@ class AHT20:
             logger.error(f"AHT20 init failed: {e}")
             raise
     
-    def read(self) -> Dict[str, float]:
+    def read(self) -> Optional[Dict[str, float]]:
         """Read temperature and humidity from AHT20"""
         try:
             # Trigger measurement
@@ -90,6 +93,10 @@ class BMP280:
                 chip_id = self.bus.read_byte_data(address, 0xD0)
                 if chip_id == 0x58:  # BMP280 chip ID
                     self.addr = address
+                    break
+                elif chip_id == 0x60:  # BME280 chip ID (compatible)
+                    self.addr = address
+                    logger.info(f"Found BME280 (compatible) at 0x{address:02X}")
                     break
             except OSError:
                 continue
@@ -169,7 +176,7 @@ class BMP280:
         
         return pressure / 100.0  # Convert to hPa
     
-    def read(self) -> Dict[str, float]:
+    def read(self) -> Optional[Dict[str, float]]:
         """Read temperature and pressure from BMP280"""
         try:
             adc_t, adc_p = self._read_raw_data()
@@ -196,7 +203,9 @@ class AHT20BMP280Sensor:
     Combined AHT20 + BMP280 Sensor Interface
     
     Compatible with the Weather Station Lab's SensorInterface
-    Provides temperature, humidity, and pressure readings
+    Provides temperature, humidity, and pressure readings.
+    
+    Note: Works even if only AHT20 is available (no pressure data).
     """
     
     def __init__(self, bus=None):
@@ -220,18 +229,24 @@ class AHT20BMP280Sensor:
         # Initialize AHT20
         try:
             self.aht20 = AHT20(self.bus)
+            print(f"✓ AHT20 initialized at 0x{ADDR_AHT20:02X}")
         except Exception as e:
+            print(f"✗ AHT20 initialization failed: {e}")
             logger.warning(f"AHT20 initialization failed: {e}")
         
         # Initialize BMP280
         try:
             self.bmp280 = BMP280(self.bus)
+            print(f"✓ BMP280 initialized at 0x{self.bmp280.addr:02X}")
         except Exception as e:
+            print(f"✗ BMP280 initialization failed: {e}")
+            print("  (Pressure readings will not be available)")
             logger.warning(f"BMP280 initialization failed: {e}")
         
         if not self.aht20 and not self.bmp280:
             raise RuntimeError("Neither AHT20 nor BMP280 sensors found!")
         
+        print()
         logger.info("AHT20+BMP280 combo sensor initialized")
     
     def read(self) -> Optional[Dict[str, float]]:
@@ -239,7 +254,7 @@ class AHT20BMP280Sensor:
         Read all sensor data
         
         Returns combined data from AHT20 (humidity) and BMP280 (pressure)
-        Temperature is averaged from both sensors for accuracy
+        Temperature is averaged from both sensors if both available
         """
         data = {}
         temps = []
@@ -259,7 +274,7 @@ class AHT20BMP280Sensor:
                 data['altitude'] = bmp_data['altitude']
                 temps.append(bmp_data['temperature'])
         
-        # Average temperatures if we have both
+        # Average temperatures if we have both, or use single reading
         if temps:
             avg_temp = sum(temps) / len(temps)
             data['temperature'] = round(avg_temp, 2)
@@ -299,6 +314,16 @@ class AHT20BMP280Sensor:
                 self.bus.close()
             except:
                 pass
+    
+    def get_status(self) -> Dict[str, bool]:
+        """Return status of each sensor"""
+        return {
+            'aht20': self.aht20 is not None,
+            'bmp280': self.bmp280 is not None,
+            'has_temperature': self.aht20 is not None or self.bmp280 is not None,
+            'has_humidity': self.aht20 is not None,
+            'has_pressure': self.bmp280 is not None
+        }
 
 
 # ============================================================
@@ -365,7 +390,12 @@ def main():
     
     try:
         sensor = AHT20BMP280Sensor()
-        print("Sensor initialized successfully!")
+        
+        # Show sensor status
+        status = sensor.get_status()
+        print("Sensor Status:")
+        print(f"  AHT20 (temp/humidity): {'✓ Available' if status['aht20'] else '✗ Not found'}")
+        print(f"  BMP280 (pressure):     {'✓ Available' if status['bmp280'] else '✗ Not found'}")
         print()
         print("Starting readings (Ctrl+C to stop)...")
         print()
@@ -374,17 +404,24 @@ def main():
             data = sensor.read()
             
             if data:
-                line = f"Temp: {data.get('temperature', 'N/A'):.2f}°C "
-                line += f"({data.get('temperature_f', 'N/A'):.2f}°F)  "
-                line += f"Humidity: {data.get('humidity', 'N/A'):.1f}%  "
-                line += f"Pressure: {data.get('pressure', 'N/A'):.2f} hPa"
+                # Build output line with available data
+                parts = []
+                
+                if 'temperature' in data:
+                    parts.append(f"Temp: {data['temperature']:.2f}°C ({data['temperature_f']:.2f}°F)")
+                
+                if 'humidity' in data:
+                    parts.append(f"Humidity: {data['humidity']:.1f}%")
+                
+                if 'pressure' in data:
+                    parts.append(f"Pressure: {data['pressure']:.2f} hPa")
                 
                 if 'altitude' in data:
-                    line += f"  Alt: {data['altitude']:.1f}m"
+                    parts.append(f"Alt: {data['altitude']:.1f}m")
                 
-                print(line)
+                print("  " + "  |  ".join(parts))
             else:
-                print("Failed to read sensor data")
+                print("  Failed to read sensor data")
             
             time.sleep(2)
             
@@ -392,10 +429,13 @@ def main():
         print("\n\nStopping...")
     except Exception as e:
         print(f"Error: {e}")
+        import traceback
+        traceback.print_exc()
         sys.exit(1)
     finally:
         if 'sensor' in locals():
             sensor.cleanup()
+            print("Sensor cleanup complete.")
 
 
 if __name__ == "__main__":
