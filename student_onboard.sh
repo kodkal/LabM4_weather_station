@@ -102,35 +102,129 @@ esac
 # Sensor mode selection - only ask if on Raspberry Pi
 if [ "$IS_RASPBERRY_PI" = true ]; then
     echo
-    echo -e "${GREEN}You have a Raspberry Pi!${NC}"
+    echo -e "${GREEN}════════════════════════════════════════════════════════════${NC}"
+    echo -e "${GREEN}  You have a Raspberry Pi! Hardware sensors are available.${NC}"
+    echo -e "${GREEN}════════════════════════════════════════════════════════════${NC}"
+    echo
     echo "How do you want to run the lab?"
-    echo "  1) Simulation Mode (no sensors needed - recommended to start)"
-    echo "  2) Hardware Mode (I have BME280/DHT22 sensor connected)"
-    echo "  3) Try hardware, fallback to simulation if not found"
-    read -p "Enter choice [1-3]: " MODE
+    echo
+    echo -e "  ${CYAN}1)${NC} Simulation Mode ${YELLOW}(no sensors needed - recommended to start)${NC}"
+    echo -e "  ${CYAN}2)${NC} Hardware Mode - BME280 sensor ${BLUE}(I2C: temp/humidity/pressure)${NC}"
+    echo -e "  ${CYAN}3)${NC} Hardware Mode - DHT22 sensor ${BLUE}(GPIO: temp/humidity only)${NC}"
+    echo -e "  ${CYAN}4)${NC} Hardware Mode - AHT20+BMP280 combo ${BLUE}(I2C: temp/humidity/pressure)${NC}"
+    echo -e "  ${CYAN}5)${NC} Auto-detect hardware, fallback to simulation if not found"
+    echo
+    read -p "Enter choice [1-5]: " MODE
     
     case $MODE in
         1) 
             SENSOR_MODE="SIMULATED"
             MODE_NAME="Simulation"
             USE_SIMULATION=true
+            SENSOR_DESCRIPTION="Simulated sensor data"
             ;;
         2) 
             SENSOR_MODE="BME280"
             MODE_NAME="Hardware (BME280)"
             USE_SIMULATION=false
+            SENSOR_DESCRIPTION="BME280 - I2C Temperature/Humidity/Pressure sensor"
             ;;
         3) 
+            SENSOR_MODE="DHT22"
+            MODE_NAME="Hardware (DHT22)"
+            USE_SIMULATION=false
+            SENSOR_DESCRIPTION="DHT22 - GPIO Temperature/Humidity sensor"
+            ;;
+        4) 
+            SENSOR_MODE="AHT20BMP280"
+            MODE_NAME="Hardware (AHT20+BMP280)"
+            USE_SIMULATION=false
+            SENSOR_DESCRIPTION="AHT20+BMP280 combo - I2C Temperature/Humidity/Pressure sensor"
+            
+            # Check if the AHT20+BMP280 module exists
+            if [ ! -f "$PROJECT_DIR/src/aht20_bmp280_sensor.py" ]; then
+                echo
+                echo -e "${YELLOW}[!] AHT20+BMP280 sensor module not found.${NC}"
+                echo -e "${BLUE}[*] The module needs to be installed for this sensor to work.${NC}"
+                echo
+                echo "You have two options:"
+                echo "  a) Download from course materials and place in src/"
+                echo "  b) Continue anyway (will need to add module later)"
+                echo
+                read -p "Continue with setup? (y/n): " CONTINUE_AHT
+                if [[ ! $CONTINUE_AHT =~ ^[Yy]$ ]]; then
+                    echo "Setup cancelled. Please obtain the aht20_bmp280_sensor.py module first."
+                    exit 1
+                fi
+            fi
+            ;;
+        5) 
             SENSOR_MODE="AUTO"
             MODE_NAME="Auto-detect"
             USE_SIMULATION=false
+            SENSOR_DESCRIPTION="Will try to detect connected hardware sensors"
             ;;
         *) 
             SENSOR_MODE="SIMULATED"
             MODE_NAME="Simulation"
             USE_SIMULATION=true
+            SENSOR_DESCRIPTION="Simulated sensor data"
             ;;
     esac
+    
+    # Show sensor wiring info for hardware modes
+    if [ "$USE_SIMULATION" = false ]; then
+        echo
+        echo -e "${BLUE}════════════════════════════════════════════════════════════${NC}"
+        echo -e "${BLUE}  Sensor Wiring Reference${NC}"
+        echo -e "${BLUE}════════════════════════════════════════════════════════════${NC}"
+        
+        case $SENSOR_MODE in
+            "BME280"|"AHT20BMP280")
+                echo
+                echo "  I2C Connection (BME280 / AHT20+BMP280):"
+                echo "  ┌─────────────┬──────────────────┐"
+                echo "  │ Sensor Pin  │ Raspberry Pi Pin │"
+                echo "  ├─────────────┼──────────────────┤"
+                echo "  │ VCC         │ Pin 1 (3.3V)     │"
+                echo "  │ GND         │ Pin 6 (Ground)   │"
+                echo "  │ SCL         │ Pin 5 (GPIO3)    │"
+                echo "  │ SDA         │ Pin 3 (GPIO2)    │"
+                echo "  └─────────────┴──────────────────┘"
+                echo
+                if [ "$SENSOR_MODE" = "AHT20BMP280" ]; then
+                    echo "  AHT20 I2C Address: 0x38"
+                    echo "  BMP280 I2C Address: 0x76 or 0x77"
+                else
+                    echo "  BME280 I2C Address: 0x76 or 0x77"
+                fi
+                echo
+                echo "  Test I2C connection: i2cdetect -y 1"
+                ;;
+            "DHT22")
+                echo
+                echo "  GPIO Connection (DHT22):"
+                echo "  ┌─────────────┬──────────────────┐"
+                echo "  │ Sensor Pin  │ Raspberry Pi Pin │"
+                echo "  ├─────────────┼──────────────────┤"
+                echo "  │ VCC         │ Pin 2 (5V)       │"
+                echo "  │ Data        │ Pin 7 (GPIO4)    │"
+                echo "  │ GND         │ Pin 6 (Ground)   │"
+                echo "  └─────────────┴──────────────────┘"
+                echo
+                echo "  Note: Some DHT22 modules need a pull-up resistor"
+                ;;
+            "AUTO")
+                echo
+                echo "  Auto-detect will try sensors in this order:"
+                echo "    1. AHT20+BMP280 (I2C 0x38 + 0x76/0x77)"
+                echo "    2. BME280 (I2C 0x76/0x77)"
+                echo "    3. DHT22 (GPIO4)"
+                echo "    4. Simulation mode (fallback)"
+                ;;
+        esac
+        echo
+    fi
 else
     # Ubuntu/non-RPi - automatically use simulation
     echo
@@ -141,6 +235,7 @@ else
     SENSOR_MODE="SIMULATED"
     MODE_NAME="Simulation"
     USE_SIMULATION=true
+    SENSOR_DESCRIPTION="Simulated sensor data"
 fi
 
 # Create student profile
@@ -160,6 +255,7 @@ PLATFORM="$PLATFORM_NAME"
 IS_RASPBERRY_PI="$IS_RASPBERRY_PI"
 START_DATE="$(date)"
 SENSOR_TYPE="$SENSOR_MODE"
+SENSOR_DESCRIPTION="$SENSOR_DESCRIPTION"
 EOF
 
 # Update .env with student settings
@@ -203,6 +299,7 @@ This is your personal workspace for the Weather Station Lab.
 **Student:** $STUDENT_NAME
 **Level:** $LEVEL_NAME
 **Mode:** $MODE_NAME
+**Sensor:** $SENSOR_DESCRIPTION
 **Platform:** $PLATFORM_NAME
 **Started:** $(date)
 EOF
@@ -216,6 +313,7 @@ cat > student_work/quick_reference.txt << EOF
 YOUR SETTINGS:
 - Platform: $PLATFORM_NAME
 - Mode: $MODE_NAME
+- Sensor: $SENSOR_MODE
 - Level: $LEVEL_NAME
 - Device ID: $DEVICE_ID
 
@@ -239,9 +337,14 @@ Activate Python Environment:
 View Your Profile:
   cat .student_profile
 
+Test I2C Sensors (if using hardware):
+  i2cdetect -y 1
+
 IMPORTANT FILES:
 ---------------
 Main Code: weather_station.py
+Sensor Module: src/sensor_module.py
+$([ "$SENSOR_MODE" = "AHT20BMP280" ] && echo "AHT20+BMP280: src/aht20_bmp280_sensor.py")
 Your Work: student_work/
 Config: .env
 Logs: logs/weather_station.log
@@ -253,6 +356,15 @@ URL: https://localhost:8443
 Default credentials (CHANGE THESE!):
   Username: admin
   Password: admin123
+
+SENSOR INFO ($SENSOR_MODE):
+--------------------------
+$SENSOR_DESCRIPTION
+$([ "$USE_SIMULATION" = false ] && echo "
+Hardware Tips:
+- Check connections if readings fail
+- Use i2cdetect -y 1 for I2C sensors
+- Verify permissions: groups \$USER")
 
 HELP:
 ----
@@ -521,6 +633,7 @@ cat > student_work/progress.md << EOF
 
 **Platform:** $PLATFORM_NAME  
 **Mode:** $MODE_NAME  
+**Sensor:** $SENSOR_MODE - $SENSOR_DESCRIPTION  
 **Level:** $LEVEL_NAME  
 **Started:** $(date)
 
@@ -663,6 +776,7 @@ fi
 echo "  • Level: $LEVEL_NAME"
 echo "  • Platform: $PLATFORM_NAME"
 echo "  • Mode: $MODE_NAME"
+echo "  • Sensor: $SENSOR_MODE"
 echo "  • Device ID: $DEVICE_ID"
 echo
 
@@ -710,8 +824,30 @@ echo "  • Progress tracker: ${GREEN}student_work/progress.md${NC}"
 echo "  • Security checklist: ${GREEN}student_work/security_checklist.md${NC}"
 echo
 
-# Platform-specific notes
-if [ "$IS_RASPBERRY_PI" = false ]; then
+# Sensor-specific notes
+if [ "$USE_SIMULATION" = false ]; then
+    echo -e "${GREEN}═══════════════════════════════════════════════════════════${NC}"
+    echo -e "${GREEN}  Hardware Mode ($SENSOR_MODE)${NC}"
+    echo -e "${GREEN}═══════════════════════════════════════════════════════════${NC}"
+    echo "  • Sensor: $SENSOR_DESCRIPTION"
+    
+    case $SENSOR_MODE in
+        "BME280"|"AHT20BMP280")
+            echo "  • Connection: I2C (pins 3, 5 for SDA/SCL)"
+            echo "  • Test connection: i2cdetect -y 1"
+            if [ "$SENSOR_MODE" = "AHT20BMP280" ]; then
+                echo "  • Expected addresses: 0x38 (AHT20) and 0x76/0x77 (BMP280)"
+            else
+                echo "  • Expected address: 0x76 or 0x77"
+            fi
+            ;;
+        "DHT22")
+            echo "  • Connection: GPIO4 (pin 7)"
+            echo "  • Note: May need 10k pull-up resistor"
+            ;;
+    esac
+    echo
+elif [ "$IS_RASPBERRY_PI" = false ]; then
     echo -e "${CYAN}═══════════════════════════════════════════════════════════${NC}"
     echo -e "${CYAN}  Simulation Mode (Ubuntu)${NC}"
     echo -e "${CYAN}═══════════════════════════════════════════════════════════${NC}"
@@ -719,6 +855,14 @@ if [ "$IS_RASPBERRY_PI" = false ]; then
     echo "  • This is perfect for the security lab!"
     echo "  • All vulnerabilities can be found in simulation mode"
     echo "  • See PLATFORM_SETUP.md for details"
+    echo
+else
+    echo -e "${CYAN}═══════════════════════════════════════════════════════════${NC}"
+    echo -e "${CYAN}  Simulation Mode${NC}"
+    echo -e "${CYAN}═══════════════════════════════════════════════════════════${NC}"
+    echo "  • You've chosen simulation mode"
+    echo "  • Great for learning without hardware setup!"
+    echo "  • Switch to hardware anytime by re-running this script"
     echo
 fi
 
@@ -738,8 +882,34 @@ else
     source venv/bin/activate
 fi
 
-# Test imports
-python3 -c "
+# Test sensor based on mode
+if [ "$SENSOR_MODE" = "AHT20BMP280" ]; then
+    # Test AHT20+BMP280 specifically
+    if [ -f "src/aht20_bmp280_sensor.py" ]; then
+        python3 -c "
+import sys
+sys.path.insert(0, 'src')
+try:
+    from aht20_bmp280_sensor import AHT20BMP280Sensor
+    sensor = AHT20BMP280Sensor()
+    data = sensor.read()
+    if data:
+        print('  ✅ AHT20+BMP280 sensor detected and working!')
+        print(f'     Temperature: {data.get(\"temperature\", \"N/A\")}°C')
+        print(f'     Humidity: {data.get(\"humidity\", \"N/A\")}%')
+        print(f'     Pressure: {data.get(\"pressure\", \"N/A\")} hPa')
+    sensor.cleanup()
+except Exception as e:
+    print(f'  ⚠️  AHT20+BMP280 sensor error: {e}')
+    print('  ℹ️  Check wiring and run: i2cdetect -y 1')
+" 2>/dev/null || echo "  ℹ️  Sensor test requires hardware - will verify when starting lab"
+    else
+        echo "  ⚠️  aht20_bmp280_sensor.py not found in src/"
+        echo "  ℹ️  Please add the sensor module to src/ directory"
+    fi
+else
+    # Test standard sensor module
+    python3 -c "
 import sys
 sys.path.insert(0, 'src')
 try:
@@ -750,6 +920,7 @@ except Exception as e:
     print(f'  ℹ️  Sensor module note: {e}')
     print('  ℹ️  This is expected if src files are not yet created')
 " 2>/dev/null || echo "  ℹ️  Sensor module will be tested when you start the lab"
+fi
 
 echo
 
@@ -764,4 +935,4 @@ echo "Good luck, $STUDENT_NAME! 🚀"
 echo
 
 # Save setup completion
-echo "$(date): Setup completed for $STUDENT_NAME ($LEVEL_NAME, $MODE_NAME)" >> .setup_log
+echo "$(date): Setup completed for $STUDENT_NAME ($LEVEL_NAME, $MODE_NAME, $SENSOR_MODE)" >> .setup_log

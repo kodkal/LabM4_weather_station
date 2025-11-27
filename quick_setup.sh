@@ -27,8 +27,8 @@ PLATFORM_NAME=""
 clear
 echo -e "${BLUE}"
 echo "╔══════════════════════════════════════════════════════════╗"
-echo "║         IoT Security - Module 4: Weather Station        ║"
-echo "║                  Utah Valley University                 ║"
+echo "║         IoT Security - Module 4: Weather Station         ║"
+echo "║                  Utah Valley University                  ║"
 echo "╚══════════════════════════════════════════════════════════╝"
 echo -e "${NC}"
 
