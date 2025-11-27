@@ -142,13 +142,13 @@ if [ "$IS_RASPBERRY_PI" = true ]; then
             SENSOR_DESCRIPTION="AHT20+BMP280 combo - I2C Temperature/Humidity/Pressure sensor"
             
             # Check if the AHT20+BMP280 module exists
-            if [ ! -f "$PROJECT_DIR/src/aht20_bmp280_sensor.py" ]; then
+            if [ ! -f "$PROJECT_DIR/aht20_bmp280_sensor.py" ]; then
                 echo
                 echo -e "${YELLOW}[!] AHT20+BMP280 sensor module not found.${NC}"
                 echo -e "${BLUE}[*] The module needs to be installed for this sensor to work.${NC}"
                 echo
                 echo "You have two options:"
-                echo "  a) Download from course materials and place in src/"
+                echo "  a) Download from course materials"
                 echo "  b) Continue anyway (will need to add module later)"
                 echo
                 read -p "Continue with setup? (y/n): " CONTINUE_AHT
@@ -343,8 +343,8 @@ Test I2C Sensors (if using hardware):
 IMPORTANT FILES:
 ---------------
 Main Code: weather_station.py
-Sensor Module: src/sensor_module.py
-$([ "$SENSOR_MODE" = "AHT20BMP280" ] && echo "AHT20+BMP280: src/aht20_bmp280_sensor.py")
+Sensor Module: sensor_module.py
+$([ "$SENSOR_MODE" = "AHT20BMP280" ] && echo "AHT20+BMP280: aht20_bmp280_sensor.py")
 Your Work: student_work/
 Config: .env
 Logs: logs/weather_station.log
@@ -406,7 +406,7 @@ STEP 2: FIND VULNERABILITIES
 ----------------------------
 Easy ones to find first:
 1. Hardcoded passwords
-   - Search: grep -r "password" src/
+   - Search: grep -r "password"
    - Look in: weather_station.py
 
 2. SQL Injection
@@ -885,7 +885,7 @@ fi
 # Test sensor based on mode
 if [ "$SENSOR_MODE" = "AHT20BMP280" ]; then
     # Test AHT20+BMP280 specifically
-    if [ -f "src/aht20_bmp280_sensor.py" ]; then
+    if [ -f "aht20_bmp280_sensor.py" ]; then
         python3 -c "
 import sys
 sys.path.insert(0, 'src')
@@ -904,8 +904,8 @@ except Exception as e:
     print('  ℹ️  Check wiring and run: i2cdetect -y 1')
 " 2>/dev/null || echo "  ℹ️  Sensor test requires hardware - will verify when starting lab"
     else
-        echo "  ⚠️  aht20_bmp280_sensor.py not found in src/"
-        echo "  ℹ️  Please add the sensor module to src/ directory"
+        echo "  ⚠️  aht20_bmp280_sensor.py not found"
+        echo "  ℹ️  Please add the sensor module"
     fi
 else
     # Test standard sensor module
