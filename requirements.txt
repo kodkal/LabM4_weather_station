@@ -1,18 +1,35 @@
-# Core Flask (required)
+# =====================================================
+# Weather Station IoT Security Lab - Core Requirements
+# UVU Module 4
+# =====================================================
+# These packages install quickly on all platforms
+# including Raspberry Pi (no compilation required)
+# =====================================================
+
+# Core Flask Framework
 Flask==2.3.3
 flask-cors==4.0.0
 flask-limiter==3.5.0
+Werkzeug==2.3.7
+
+# Environment & Configuration
 python-dotenv==1.0.0
 
-# Authentication - for demonstrating JWT vulnerabilities
+# Authentication (JWT for teaching token vulnerabilities)
 PyJWT==2.8.0
 
-# Testing & Security Analysis
-pytest==7.4.3
+# HTTP Requests (for API testing)
 requests==2.31.0
 
-# Logging with color output
+# Testing Framework
+pytest==7.4.3
+
+# Colored Output (for test scripts)
+colorama==0.4.6
 colorlog==6.8.0
 
-# Input validation (pick ONE)
+# Input Validation
 validators==0.22.0
+
+# YAML Support (for config files)
+PyYAML==6.0.1
