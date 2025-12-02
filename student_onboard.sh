@@ -264,6 +264,22 @@ source venv/bin/activate
 # Upgrade pip silently
 pip install --upgrade pip > /dev/null 2>&1
 
+# Install system build dependencies (needed for cryptography, argon2, etc.)
+if [ "$IS_RASPBERRY_PI" = true ]; then
+    echo -e "${CYAN}    Installing system build dependencies...${NC}"
+    sudo apt-get update -qq
+    sudo apt-get install -y \
+        build-essential \
+        libffi-dev \
+        libssl-dev \
+        python3-dev \
+        cargo \
+        rustc \
+        > /dev/null 2>&1 && \
+        echo -e "${GREEN}    ✅ Build dependencies installed${NC}" || \
+        echo -e "${YELLOW}    ⚠️  Some build deps may be missing - pip install might be slow${NC}"
+fi
+
 # Install colorama (needed for test_security.py)
 echo -e "${CYAN}    Installing colorama (for security tests)...${NC}"
 if pip install colorama > /dev/null 2>&1; then
@@ -283,11 +299,22 @@ fi
 # Install requirements.txt if it exists
 if [ -f requirements.txt ]; then
     echo -e "${CYAN}    Installing requirements from requirements.txt...${NC}"
-    if pip install -r requirements.txt 2>&1 | tail -5; then
-        echo -e "${GREEN}    ✅ Requirements installed${NC}"
+    echo -e "${CYAN}    (This may take several minutes on Raspberry Pi)${NC}"
+    echo
+    if pip install -r requirements.txt 2>&1 | tee /tmp/pip_install.log | grep -E "(Installing|Successfully|error|ERROR|Failed)" | tail -20; then
+        if grep -q "Successfully installed" /tmp/pip_install.log; then
+            echo
+            echo -e "${GREEN}    ✅ Requirements installed${NC}"
+        else
+            echo
+            echo -e "${YELLOW}    ⚠️  Some requirements may have failed${NC}"
+            echo -e "${YELLOW}    Check /tmp/pip_install.log for details${NC}"
+        fi
     else
-        echo -e "${YELLOW}    ⚠️  Some requirements may have failed - continuing anyway${NC}"
+        echo
+        echo -e "${YELLOW}    ⚠️  Requirements installation had issues - continuing anyway${NC}"
         echo -e "${YELLOW}    You can manually run: pip install -r requirements.txt${NC}"
+        echo -e "${YELLOW}    Check /tmp/pip_install.log for details${NC}"
     fi
 fi
 
