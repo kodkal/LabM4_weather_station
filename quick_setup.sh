@@ -174,7 +174,7 @@ setup_python_env() {
     # Install requirements based on platform
     if [ -f requirements.txt ]; then
         print_status "Installing Python packages..."
-        print_info "This may take a minute..."
+        print_info "This may take a few minutes..."
         
         # Install main requirements (should be fast with minimal requirements.txt)
         if pip install -r requirements.txt 2>&1 | grep -E "(Installing|Successfully|error|ERROR)" | tail -10; then
@@ -717,7 +717,7 @@ display_next_steps() {
     echo "     cd $PROJECT_DIR"
     echo
     echo -e "  ${GREEN}2. Run student onboarding:${NC}"
-    echo "     ./student_onboarding.sh"
+    echo "     ./student_onboard.sh"
     echo
     echo -e "  ${GREEN}3. Start Weather Station:${NC}"
     echo "     ./start_weather_station.sh"
@@ -765,7 +765,7 @@ display_next_steps() {
     echo -e "${GREEN}  Next Steps${NC}"
     echo -e "${GREEN}═════════════════════════════════════════════════════════${NC}"
     echo
-    echo "  • Run ./student_onboarding.sh to personalize your setup"
+    echo "  • Run ./student_onboard.sh to personalize your setup"
     echo "  • Read PLATFORM_SETUP.md for detailed instructions"
     echo "  • Check docs/ folder for lab guides"
     echo "  • API will be available at: https://localhost:8443"

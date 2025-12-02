@@ -49,7 +49,7 @@ Wait for it to complete. Should take 5-10 minutes.
 
 ### Step 2: Run Onboarding
 ```bash
-./student_onboarding.sh
+./student_onboard.sh
 ```
 
 Answer the questions:

@@ -130,11 +130,11 @@ git push
 ```bash
 # On Ubuntu
 ./quick_setup.sh         # Should complete fully
-./student_onboarding.sh  # Should NOT ask about sensors
+./student_onboard.sh  # Should NOT ask about sensors
 
 # On Raspberry Pi (if available)
 ./quick_setup.sh         # Should enable hardware
-./student_onboarding.sh  # Should offer sensor choice
+./student_onboard.sh  # Should offer sensor choice
 ```
 
 **Done!** Students use same commands, better experience.
