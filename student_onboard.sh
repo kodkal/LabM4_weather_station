@@ -4,7 +4,8 @@
 # Personalized setup for each student
 # =====================================================
 
-set -e
+# Note: We don't use 'set -e' because we want the script to continue
+# even if optional installations fail (like pip packages)
 
 # Colors
 RED='\033[0;31m'
@@ -265,19 +266,29 @@ pip install --upgrade pip > /dev/null 2>&1
 
 # Install colorama (needed for test_security.py)
 echo -e "${CYAN}    Installing colorama (for security tests)...${NC}"
-pip install colorama > /dev/null 2>&1
-echo -e "${GREEN}    ✅ colorama installed${NC}"
+if pip install colorama > /dev/null 2>&1; then
+    echo -e "${GREEN}    ✅ colorama installed${NC}"
+else
+    echo -e "${YELLOW}    ⚠️  colorama installation had issues (may already be installed)${NC}"
+fi
 
 # Install pyyaml
 echo -e "${CYAN}    Installing pyyaml...${NC}"
-pip install pyyaml > /dev/null 2>&1
-echo -e "${GREEN}    ✅ pyyaml installed${NC}"
+if pip install pyyaml > /dev/null 2>&1; then
+    echo -e "${GREEN}    ✅ pyyaml installed${NC}"
+else
+    echo -e "${YELLOW}    ⚠️  pyyaml installation had issues (may already be installed)${NC}"
+fi
 
 # Install requirements.txt if it exists
 if [ -f requirements.txt ]; then
     echo -e "${CYAN}    Installing requirements from requirements.txt...${NC}"
-    pip install -r requirements.txt > /dev/null 2>&1
-    echo -e "${GREEN}    ✅ Requirements installed${NC}"
+    if pip install -r requirements.txt 2>&1 | tail -5; then
+        echo -e "${GREEN}    ✅ Requirements installed${NC}"
+    else
+        echo -e "${YELLOW}    ⚠️  Some requirements may have failed - continuing anyway${NC}"
+        echo -e "${YELLOW}    You can manually run: pip install -r requirements.txt${NC}"
+    fi
 fi
 
 # =====================================================
