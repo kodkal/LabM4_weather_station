@@ -264,20 +264,19 @@ source venv/bin/activate
 # Upgrade pip silently
 pip install --upgrade pip > /dev/null 2>&1
 
-# Install system build dependencies (needed for cryptography, argon2, etc.)
+# Install system build dependencies (only basic ones needed now)
 if [ "$IS_RASPBERRY_PI" = true ]; then
     echo -e "${CYAN}    Installing system build dependencies...${NC}"
     sudo apt-get update -qq
+    # Note: We removed cargo/rustc since cryptography is no longer in requirements.txt
     sudo apt-get install -y \
         build-essential \
         libffi-dev \
         libssl-dev \
         python3-dev \
-        cargo \
-        rustc \
         > /dev/null 2>&1 && \
         echo -e "${GREEN}    ✅ Build dependencies installed${NC}" || \
-        echo -e "${YELLOW}    ⚠️  Some build deps may be missing - pip install might be slow${NC}"
+        echo -e "${YELLOW}    ⚠️  Some build deps may be missing${NC}"
 fi
 
 # Install colorama (needed for test_security.py)
@@ -1046,9 +1045,9 @@ elif [ "$LEVEL" == "3" ]; then
 fi
 
 echo -e "${BLUE}Your Workspace:${NC}"
-echo "  • Personal workspace: ${GREEN}student_work/${NC}"
-echo "  • Progress tracker: ${GREEN}student_work/progress.md${NC}"
-echo "  • Security checklist: ${GREEN}student_work/security_checklist.md${NC}"
+echo -e "  • Personal workspace: ${GREEN}student_work/${NC}"
+echo -e "  • Progress tracker: ${GREEN}student_work/progress.md${NC}"
+echo -e "  • Security checklist: ${GREEN}student_work/security_checklist.md${NC}"
 echo
 
 # Sensor-specific notes

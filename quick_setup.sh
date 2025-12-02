@@ -140,6 +140,7 @@ clone_repository() {
             print_status "Using existing directory - pulling latest changes"
             cd "$PROJECT_DIR"
             git pull origin main 2>/dev/null || git pull origin master 2>/dev/null || print_warning "Could not pull updates"
+            chmod +x *.sh 2>/dev/null || true
             print_success "Repository updated"
             return 0
         fi
@@ -148,6 +149,10 @@ clone_repository() {
     # Clone the repository
     git clone "$GITHUB_REPO" "$PROJECT_DIR"
     cd "$PROJECT_DIR"
+    
+    # Make all shell scripts executable
+    chmod +x *.sh 2>/dev/null || true
+    
     print_success "Repository cloned to $PROJECT_DIR"
 }
 
