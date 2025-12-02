@@ -122,24 +122,28 @@ if [ "$IS_RASPBERRY_PI" = true ]; then
             MODE_NAME="Simulation"
             USE_SIMULATION=true
             SENSOR_DESCRIPTION="Simulated sensor data"
+            USE_I2C=false
             ;;
         2) 
             SENSOR_MODE="BME280"
             MODE_NAME="Hardware (BME280)"
             USE_SIMULATION=false
             SENSOR_DESCRIPTION="BME280 - I2C Temperature/Humidity/Pressure sensor"
+            USE_I2C=true
             ;;
         3) 
             SENSOR_MODE="DHT22"
             MODE_NAME="Hardware (DHT22)"
             USE_SIMULATION=false
             SENSOR_DESCRIPTION="DHT22 - GPIO Temperature/Humidity sensor"
+            USE_I2C=false
             ;;
         4) 
             SENSOR_MODE="AHT20BMP280"
             MODE_NAME="Hardware (AHT20+BMP280)"
             USE_SIMULATION=false
             SENSOR_DESCRIPTION="AHT20+BMP280 combo - I2C Temperature/Humidity/Pressure sensor"
+            USE_I2C=true
             
             # Check if the AHT20+BMP280 module exists
             if [ ! -f "$PROJECT_DIR/aht20_bmp280_sensor.py" ]; then
@@ -163,12 +167,14 @@ if [ "$IS_RASPBERRY_PI" = true ]; then
             MODE_NAME="Auto-detect"
             USE_SIMULATION=false
             SENSOR_DESCRIPTION="Will try to detect connected hardware sensors"
+            USE_I2C=true
             ;;
         *) 
             SENSOR_MODE="SIMULATED"
             MODE_NAME="Simulation"
             USE_SIMULATION=true
             SENSOR_DESCRIPTION="Simulated sensor data"
+            USE_I2C=false
             ;;
     esac
     
@@ -236,13 +242,180 @@ else
     MODE_NAME="Simulation"
     USE_SIMULATION=true
     SENSOR_DESCRIPTION="Simulated sensor data"
+    USE_I2C=false
+fi
+
+# =====================================================
+# COMMON DEPENDENCIES (All platforms)
+# =====================================================
+echo
+echo -e "${BLUE}[*] Installing common Python dependencies...${NC}"
+
+cd "$PROJECT_DIR"
+
+# Create/activate virtual environment
+if [ ! -d "venv" ]; then
+    echo -e "${CYAN}    Creating Python virtual environment...${NC}"
+    python3 -m venv venv
+fi
+source venv/bin/activate
+
+# Upgrade pip silently
+pip install --upgrade pip > /dev/null 2>&1
+
+# Install colorama (needed for test_security.py)
+echo -e "${CYAN}    Installing colorama (for security tests)...${NC}"
+pip install colorama > /dev/null 2>&1
+echo -e "${GREEN}    ✅ colorama installed${NC}"
+
+# Install pyyaml
+echo -e "${CYAN}    Installing pyyaml...${NC}"
+pip install pyyaml > /dev/null 2>&1
+echo -e "${GREEN}    ✅ pyyaml installed${NC}"
+
+# Install requirements.txt if it exists
+if [ -f requirements.txt ]; then
+    echo -e "${CYAN}    Installing requirements from requirements.txt...${NC}"
+    pip install -r requirements.txt > /dev/null 2>&1
+    echo -e "${GREEN}    ✅ Requirements installed${NC}"
+fi
+
+# =====================================================
+# HARDWARE DEPENDENCIES SETUP (Raspberry Pi only)
+# =====================================================
+if [ "$IS_RASPBERRY_PI" = true ] && [ "$USE_SIMULATION" = false ]; then
+    echo
+    echo -e "${MAGENTA}════════════════════════════════════════════════════════════${NC}"
+    echo -e "${MAGENTA}  Installing Hardware Dependencies${NC}"
+    echo -e "${MAGENTA}════════════════════════════════════════════════════════════${NC}"
+    echo
+    
+    # Ensure we're in the project directory and venv is active
+    cd "$PROJECT_DIR"
+    source venv/bin/activate
+    
+    # Install I2C dependencies for I2C sensors
+    if [ "$USE_I2C" = true ]; then
+        echo -e "${BLUE}[*] Installing I2C dependencies (smbus, smbus2)...${NC}"
+        pip install smbus smbus2 2>/dev/null || {
+            echo -e "${YELLOW}    Installing smbus via apt...${NC}"
+            sudo apt-get update -qq
+            sudo apt-get install -y python3-smbus i2c-tools > /dev/null 2>&1
+            pip install smbus2 2>/dev/null || true
+        }
+        echo -e "${GREEN}    ✅ I2C libraries installed${NC}"
+        
+        # Verify I2C is enabled
+        echo
+        echo -e "${BLUE}[*] Checking I2C interface...${NC}"
+        if [ -e /dev/i2c-1 ]; then
+            echo -e "${GREEN}    ✅ I2C interface is enabled (/dev/i2c-1)${NC}"
+            
+            # Run i2cdetect to show connected devices
+            echo
+            echo -e "${CYAN}[*] Scanning I2C bus for connected devices...${NC}"
+            echo
+            sudo i2cdetect -y 1 2>/dev/null || {
+                echo -e "${YELLOW}    ⚠️  Could not scan I2C bus (may need permissions)${NC}"
+                echo "    Try running: sudo i2cdetect -y 1"
+            }
+            echo
+            
+            # Expected addresses based on sensor type
+            case $SENSOR_MODE in
+                "AHT20BMP280")
+                    echo -e "${CYAN}    Expected addresses:${NC}"
+                    echo "      • 0x38 = AHT20 (temperature/humidity)"
+                    echo "      • 0x76 or 0x77 = BMP280 (pressure)"
+                    ;;
+                "BME280")
+                    echo -e "${CYAN}    Expected addresses:${NC}"
+                    echo "      • 0x76 or 0x77 = BME280"
+                    ;;
+            esac
+        else
+            echo -e "${YELLOW}    ⚠️  I2C interface not enabled!${NC}"
+            echo
+            echo -e "${YELLOW}    To enable I2C:${NC}"
+            echo "      1. Run: sudo raspi-config"
+            echo "      2. Go to: Interface Options → I2C → Enable"
+            echo "      3. Reboot your Pi"
+            echo
+            read -p "    Continue anyway? (y/n): " CONTINUE_I2C
+            if [[ ! $CONTINUE_I2C =~ ^[Yy]$ ]]; then
+                echo "    Please enable I2C and run this script again."
+                exit 1
+            fi
+        fi
+    fi
+    
+    # Firewall setup
+    echo
+    echo -e "${BLUE}[*] Configuring firewall (UFW)...${NC}"
+    
+    # Check if ufw is installed
+    if ! command -v ufw &> /dev/null; then
+        echo -e "${YELLOW}    Installing UFW...${NC}"
+        sudo apt-get update -qq
+        sudo apt-get install -y ufw > /dev/null 2>&1
+    fi
+    
+    # Allow the weather station port
+    echo -e "${CYAN}    Allowing port 8080/tcp for Weather Station API...${NC}"
+    sudo ufw allow 8080/tcp > /dev/null 2>&1 || true
+    
+    # Allow HTTPS port as well
+    echo -e "${CYAN}    Allowing port 8443/tcp for HTTPS API...${NC}"
+    sudo ufw allow 8443/tcp > /dev/null 2>&1 || true
+    
+    # Check if UFW is enabled
+    UFW_STATUS=$(sudo ufw status 2>/dev/null | head -1)
+    if [[ $UFW_STATUS == *"inactive"* ]]; then
+        echo -e "${YELLOW}    ⚠️  UFW is installed but not enabled${NC}"
+        echo "    To enable: sudo ufw enable"
+        echo "    (SSH access on port 22 should be allowed first!)"
+    else
+        echo -e "${GREEN}    ✅ Firewall rules configured${NC}"
+    fi
+    
+    # Test sensor if applicable
+    echo
+    echo -e "${BLUE}[*] Testing sensor connection...${NC}"
+    
+    case $SENSOR_MODE in
+        "AHT20BMP280")
+            if [ -f "aht20_bmp280_sensor.py" ]; then
+                echo -e "${CYAN}    Running AHT20+BMP280 sensor test...${NC}"
+                python3 aht20_bmp280_sensor.py 2>&1 | head -10 || {
+                    echo -e "${YELLOW}    ⚠️  Sensor test had issues${NC}"
+                    echo "    This may be normal if sensor isn't connected yet."
+                }
+            else
+                echo -e "${YELLOW}    ⚠️  aht20_bmp280_sensor.py not found${NC}"
+                echo "    You'll need to add this file for hardware mode to work."
+            fi
+            ;;
+        "BME280")
+            echo -e "${CYAN}    BME280 sensor will be tested when starting the weather station${NC}"
+            ;;
+        "DHT22")
+            echo -e "${CYAN}    DHT22 sensor will be tested when starting the weather station${NC}"
+            ;;
+        "AUTO")
+            echo -e "${CYAN}    Sensors will be auto-detected when starting the weather station${NC}"
+            ;;
+    esac
+    
+    echo
+    echo -e "${GREEN}════════════════════════════════════════════════════════════${NC}"
+    echo -e "${GREEN}  Hardware Dependencies Setup Complete!${NC}"
+    echo -e "${GREEN}════════════════════════════════════════════════════════════${NC}"
+    echo
 fi
 
 # Create student profile
 echo
 echo -e "${BLUE}Creating your profile...${NC}"
-
-cd "$PROJECT_DIR"
 
 # Create student profile file
 cat > .student_profile << EOF
@@ -365,6 +538,22 @@ Hardware Tips:
 - Check connections if readings fail
 - Use i2cdetect -y 1 for I2C sensors
 - Verify permissions: groups \$USER")
+
+HARDWARE TROUBLESHOOTING:
+------------------------
+If you see 'No module named smbus':
+  source venv/bin/activate
+  pip install smbus smbus2
+
+If I2C not detected:
+  sudo raspi-config → Interface Options → I2C → Enable
+  sudo reboot
+
+Test I2C devices:
+  sudo i2cdetect -y 1
+
+Test AHT20+BMP280 sensor:
+  python3 aht20_bmp280_sensor.py
 
 HELP:
 ----
@@ -846,6 +1035,15 @@ if [ "$USE_SIMULATION" = false ]; then
             echo "  • Note: May need 10k pull-up resistor"
             ;;
     esac
+    echo
+    
+    # Hardware troubleshooting reminder
+    echo -e "${YELLOW}  Hardware Troubleshooting:${NC}"
+    echo "  If sensor doesn't work:"
+    echo "    1. Check wiring connections"
+    echo "    2. Run: sudo i2cdetect -y 1"
+    echo "    3. If smbus error: pip install smbus smbus2"
+    echo "    4. Test sensor: python3 aht20_bmp280_sensor.py"
     echo
 elif [ "$IS_RASPBERRY_PI" = false ]; then
     echo -e "${CYAN}═══════════════════════════════════════════════════════════${NC}"
