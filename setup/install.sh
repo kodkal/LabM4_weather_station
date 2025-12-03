@@ -4,7 +4,7 @@
 # One-line installation script for students
 # 
 # Usage:
-#   curl -sSL https://raw.githubusercontent.com/kodkal/LabM4_weather_station/main/install.sh | bash
+#   curl -sSL https://raw.githubusercontent.com/kodkal/LabM4_weather_station/main/setup/install.sh | bash
 # =====================================================
 
 set -e
@@ -59,7 +59,11 @@ fi
 # Run the full setup script
 echo "Running full setup..."
 cd "$INSTALL_DIR"
-chmod +x /setup/quick_setup.sh
+
+# Make setup scripts executable
+chmod +x setup/*.sh
+
+# Run quick_setup from the setup directory
 ./setup/quick_setup.sh
 
 echo -e "${GREEN}"
@@ -68,8 +72,11 @@ echo "   Installation Complete! 🎉"
 echo "================================="
 echo -e "${NC}"
 echo
-echo "To start the weather station:"
+echo "Next steps:"
 echo "  cd $INSTALL_DIR"
-echo "  ./start_weather_station.sh"
+echo "  ./setup/student_onboard.sh"
+echo
+echo "To start the weather station:"
+echo "  python3 vulnerable_weather_station.py"
 echo
 echo "For help, see: $INSTALL_DIR/docs/SSH_QUICK_START.md"
