@@ -40,7 +40,7 @@ python weather_station.py
 
 ### Step 1: Run Setup
 ```bash
-./quick_setup.sh
+./setup/quick_setup.sh
 ```
 
 Wait for it to complete. Should take 5-10 minutes.

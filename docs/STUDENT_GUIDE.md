@@ -467,7 +467,7 @@ cd ~/LabM4_weather_station/setup
 # Try manual installation:
 git clone https://github.com/kodkal/LabM4_weather_station.git
 cd LabM4_weather_station
-./quick_setup.sh
+./setup/quick_setup.sh
 ```
 
 ### Security Test Not Working?

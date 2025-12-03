@@ -139,7 +139,7 @@ Shows menu with options:
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| `quick_setup.sh` | Full installation | `./quick_setup.sh` |
+| `quick_setup.sh` | Full installation | `./setup/quick_setup.sh` |
 | `reset_lab.sh` | Reset environment | `./reset_lab.sh [soft\|hard]` |
 | `student_onboard.sh` | Personalize for student | `./student_onboard.sh` |
 
@@ -247,7 +247,7 @@ ping -c 3 github.com
 # Try manual clone
 git clone https://github.com/kodkal/LabM4_weather_station.git
 cd LabM4_weather_station
-./quick_setup.sh
+./setup/quick_setup.sh
 ```
 
 ### Reset Script Fails

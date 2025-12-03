@@ -59,8 +59,8 @@ fi
 # Run the full setup script
 echo "Running full setup..."
 cd "$INSTALL_DIR"
-chmod +x quick_setup.sh
-./quick_setup.sh
+chmod +x /setup/quick_setup.sh
+./setup/quick_setup.sh
 
 echo -e "${GREEN}"
 echo "================================="
