@@ -59,7 +59,7 @@ curl -sSL https://raw.githubusercontent.com/kodkal/LabM4_weather_station/main/in
 ### Step 3: Personalize Setup
 ```bash
 cd ~/LabM4_weather_station
-./setup/student_onboard.sh
+./setu./setup/student_onboard.sh
 ```
 
 The automatic installation will:
@@ -386,13 +386,13 @@ curl -X POST http://localhost:8080/api/login \
 #### Soft Reset (keep installation)
 ```bash
 cd ~/LabM4_weather_station/setup
-./reset_lab.sh soft
+./setup/reset_lab.sh soft
 ```
 
 #### Hard Reset (complete removal)
 ```bash
 cd ~/LabM4_weather_station/setup
-./reset_lab.sh hard
+./setup/reset_lab.sh hard
 
 # Then reinstall
 curl -sSL https://raw.githubusercontent.com/kodkal/LabM4_weather_station/main/install.sh | bash

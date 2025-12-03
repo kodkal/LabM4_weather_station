@@ -53,7 +53,7 @@ curl -sSL https://raw.githubusercontent.com/kodkal/LabM4_weather_station/main/in
 9. Run the onboarding script:
 ```bash
 cd ~/LabM4_weather_station
-./setup/student_onboard.sh
+./setu./setup/student_onboard.sh
 ```
 
 10. Answer the prompts:
@@ -374,12 +374,12 @@ scp pi@[PI_IP]:~/[YourLastName]_Module4_Submission.tar.gz ./
 57. Reset your environment:
 ```bash
 cd ~/LabM4_weather_station/setup
-./reset_lab.sh soft
+./setup/reset_lab.sh soft
 ```
 
 ### Complete Reset (removes everything):
 ```bash
-./reset_lab.sh hard
+./setup/reset_lab.sh hard
 ```
 
 ---
@@ -467,7 +467,7 @@ cd ~/LabM4_weather_station/setup
 # Try manual installation:
 git clone https://github.com/kodkal/LabM4_weather_station.git
 cd LabM4_weather_station
-./setup/quick_setup.sh
+./setu./setup/quick_setup.sh
 ```
 
 ### Security Test Not Working?

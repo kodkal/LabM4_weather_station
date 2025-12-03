@@ -26,7 +26,7 @@ That's it! This will:
 1. **Personalize your setup:**
 ```bash
 cd ~/LabM4_weather_station
-./setup/student_onboard.sh
+./setu./setup/student_onboard.sh
 ```
 
 2. **Start the weather station:**
@@ -83,12 +83,12 @@ Clears student data while preserving the installation:
 
 ```bash
 cd ~/LabM4_weather_station/setup
-./reset_lab.sh soft
+./setup/reset_lab.sh soft
 ```
 
 Or directly:
 ```bash
-./reset_lab.sh soft --backup  # Creates backup first
+./setup/reset_lab.sh soft --backup  # Creates backup first
 ```
 
 This will:
@@ -104,7 +104,7 @@ Completely removes everything:
 
 ```bash
 cd ~/LabM4_weather_station/setup
-./reset_lab.sh hard
+./setup/reset_lab.sh hard
 ```
 
 **Warning:** This deletes the entire project!
@@ -113,7 +113,7 @@ cd ~/LabM4_weather_station/setup
 Just clean temporary files:
 
 ```bash
-./reset_lab.sh clean
+./setup/reset_lab.sh clean
 ```
 
 ### Interactive Reset Menu
@@ -121,7 +121,7 @@ For a user-friendly interface:
 
 ```bash
 cd ~/LabM4_weather_station/setup
-./reset_lab.sh
+./setup/reset_lab.sh
 ```
 
 Shows menu with options:
@@ -139,9 +139,9 @@ Shows menu with options:
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| `quick_setup.sh` | Full installation | `./setup/quick_setup.sh` |
-| `reset_lab.sh` | Reset environment | `./reset_lab.sh [soft\|hard]` |
-| `student_onboard.sh` | Personalize for student | `./student_onboard.sh` |
+| `quick_setup.sh` | Full installation | `./setu./setup/quick_setup.sh` |
+| `reset_lab.sh` | Reset environment | `./setup/reset_lab.sh [soft\|hard]` |
+| `student_onboard.sh` | Personalize for student | `./setup/student_onboard.sh` |
 
 ### 📁 `/scripts` Directory Tools
 
@@ -163,7 +163,7 @@ PI_IPS="192.168.1.101 192.168.1.102 192.168.1.103"
 
 for IP in $PI_IPS; do
     echo "Resetting Pi at $IP..."
-    ssh pi@$IP "cd ~/LabM4_weather_station/setup && ./reset_lab.sh soft"
+    ssh pi@$IP "cd ~/LabM4_weather_station/setup && ./setup/reset_lab.sh soft"
 done
 ```
 
@@ -201,7 +201,7 @@ done
 ### Before Class
 ```bash
 # On all Pis
-./reset_lab.sh soft
+./setup/reset_lab.sh soft
 ```
 
 ### Start of Class
@@ -212,7 +212,7 @@ curl -sSL https://raw.githubusercontent.com/kodkal/LabM4_weather_station/main/in
 
 # Then personalize
 cd ~/LabM4_weather_station
-./setup/student_onboard.sh
+./setu./setup/student_onboard.sh
 ```
 
 ### During Class
@@ -232,7 +232,7 @@ cd ~/LabM4_weather_station
 tar -czf ~/my_work.tar.gz student_work/
 
 # Instructor resets
-./setup/reset_lab.sh soft
+./setu./setup/reset_lab.sh soft
 ```
 
 ---
@@ -247,7 +247,7 @@ ping -c 3 github.com
 # Try manual clone
 git clone https://github.com/kodkal/LabM4_weather_station.git
 cd LabM4_weather_station
-./setup/quick_setup.sh
+./setu./setup/quick_setup.sh
 ```
 
 ### Reset Script Fails
@@ -317,10 +317,10 @@ cd ~/LabM4_weather_station && ./start_weather_station.sh
 ./test_security.sh
 
 # Reset (soft)
-./setup/reset_lab.sh soft
+./setu./setup/reset_lab.sh soft
 
 # Reset (hard)  
-./setup/reset_lab.sh hard
+./setu./setup/reset_lab.sh hard
 
 # Switch to vulnerable
 python scripts/manage_vulnerabilities.py switch vulnerable

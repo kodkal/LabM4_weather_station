@@ -129,12 +129,12 @@ git push
 ### Step 2: Test
 ```bash
 # On Ubuntu
-./setup/quick_setup.sh         # Should complete fully
-./student_onboard.sh  # Should NOT ask about sensors
+./setu./setup/quick_setup.sh         # Should complete fully
+./setup/student_onboard.sh  # Should NOT ask about sensors
 
 # On Raspberry Pi (if available)
-./setup/quick_setup.sh         # Should enable hardware
-./student_onboard.sh  # Should offer sensor choice
+./setu./setup/quick_setup.sh         # Should enable hardware
+./setup/student_onboard.sh  # Should offer sensor choice
 ```
 
 **Done!** Students use same commands, better experience.

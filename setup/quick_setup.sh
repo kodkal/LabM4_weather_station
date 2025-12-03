@@ -717,7 +717,7 @@ display_next_steps() {
     echo "     cd $PROJECT_DIR"
     echo
     echo -e "  ${GREEN}2. Run student onboarding:${NC}"
-    echo "     ./student_onboard.sh"
+    echo "     ./setup/student_onboard.sh"
     echo
     echo -e "  ${GREEN}3. Start Weather Station:${NC}"
     echo "     ./start_weather_station.sh"
@@ -765,7 +765,7 @@ display_next_steps() {
     echo -e "${GREEN}  Next Steps${NC}"
     echo -e "${GREEN}═════════════════════════════════════════════════════════${NC}"
     echo
-    echo "  • Run ./student_onboard.sh to personalize your setup"
+    echo "  • Run ./setup/student_onboard.sh to personalize your setup"
     echo "  • Read PLATFORM_SETUP.md for detailed instructions"
     echo "  • Check docs/ folder for lab guides"
     echo "  • API will be available at: https://localhost:8443"

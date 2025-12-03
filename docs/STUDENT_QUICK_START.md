@@ -40,7 +40,7 @@ python weather_station.py
 
 ### Step 1: Run Setup
 ```bash
-./setup/quick_setup.sh
+./setu./setup/quick_setup.sh
 ```
 
 Wait for it to complete. Should take 5-10 minutes.
@@ -49,7 +49,7 @@ Wait for it to complete. Should take 5-10 minutes.
 
 ### Step 2: Run Onboarding
 ```bash
-./student_onboard.sh
+./setup/student_onboard.sh
 ```
 
 Answer the questions:
