@@ -335,7 +335,8 @@ configure_firewall() {
     # Configure firewall rules
     sudo ufw default deny incoming > /dev/null 2>&1
     sudo ufw default allow outgoing > /dev/null 2>&1
-    sudo ufw allow ssh > /dev/null 2>&1
+    sudo ufw allow 22/tcp comment 'SSH'
+    sudo ufw allow 2222/tcp comment 'SSH alternate'
     sudo ufw allow 8443/tcp comment 'Weather Station API' > /dev/null 2>&1
     sudo ufw allow 8080/tcp comment 'Weather Station HTTP' > /dev/null 2>&1
     
