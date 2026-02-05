@@ -33,6 +33,7 @@ class SecurityTester:
             'failed': [],
             'warnings': []
         }
+        self.session.verify = False
 
         # FIXED: Auto-detect source file, prioritizing vulnerable_weather_station.py
         if source_file:
@@ -578,8 +579,8 @@ def main():
     )
     parser.add_argument(
         '--url',
-        default='http://localhost:8080',
-        help='Base URL of weather station (default: http://localhost:8080)'
+        default='http://localhost:8443',
+        help='Base URL of weather station (default: http://localhost:8443)'
     )
     parser.add_argument(
         '--source-file',
@@ -597,7 +598,7 @@ def main():
     # Check if server is running
     print(f"Checking if server is running at {args.url}...")
     try:
-        response = requests.get(args.url, timeout=5)
+        response = requests.get(args.url, timeout=5, verify=False)
         print(f"{Fore.GREEN}Server is running{Style.RESET_ALL}")
     except:
         print(f"{Fore.RED}Server not responding at {args.url}{Style.RESET_ALL}")
