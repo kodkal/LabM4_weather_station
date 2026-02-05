@@ -141,12 +141,12 @@ GND         →  Pin 6 (Ground)
 
 ```bash
 # Authenticate
-curl -X POST https://localhost:8443/api/auth/login \
+curl -X POST https://localhost:8080/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"device_id": "weather-001", "api_key": "your-key"}'
 
 # Get sensor data
-curl -X GET https://localhost:8443/api/data \
+curl -X GET https://localhost:8080/api/data \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 

@@ -280,7 +280,7 @@ configure_environment() {
 SECRET_KEY=change-this-to-a-secure-random-key
 JWT_SECRET_KEY=change-this-to-another-secure-key
 FLASK_ENV=development
-API_PORT=8443
+API_PORT=8080
 SENSOR_SIMULATION=false
 LOG_LEVEL=INFO
 EOF
@@ -655,7 +655,7 @@ EOF
 ## API Access
 
 Once started, access the Weather Station API at:
-- **URL:** https://localhost:8443
+- **URL:** https://localhost:8080
 - **Certificate:** Self-signed (you'll see a security warning - this is expected)
 
 ## Environment Variables
@@ -768,7 +768,7 @@ display_next_steps() {
     echo "  • Run ./student_onboard.sh to personalize your setup"
     echo "  • Read PLATFORM_SETUP.md for detailed instructions"
     echo "  • Check docs/ folder for lab guides"
-    echo "  • API will be available at: https://localhost:8443"
+    echo "  • API will be available at: https://localhost:8080"
     echo
     echo -e "${GREEN}Ready to start Module 4! 🚀${NC}"
     echo

@@ -579,8 +579,8 @@ def main():
     )
     parser.add_argument(
         '--url',
-        default='http://localhost:8443',
-        help='Base URL of weather station (default: http://localhost:8443)'
+        default='http://localhost:8080',
+        help='Base URL of weather station (default: http://localhost:8080)'
     )
     parser.add_argument(
         '--source-file',

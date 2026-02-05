@@ -562,7 +562,7 @@ Platform Guide: PLATFORM_SETUP.md
 
 API ACCESS:
 ----------
-URL: https://localhost:8443
+URL: https://localhost:8080
 Default credentials (CHANGE THESE!):
   Username: admin
   Password: admin123
