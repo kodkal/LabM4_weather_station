@@ -7,7 +7,7 @@
 - **Student Name**: [Your Name]
 - **Version**: 1.0
 - **Last Updated**: [Date]
-- **Base URL**: `https://localhost:8443/api`
+- **Base URL**: `https://localhost:8080/api`
 
 ---
 
@@ -440,7 +440,7 @@ Strict-Transport-Security: max-age=31536000
 ### 8.1 Complete Authentication Flow
 ```bash
 # 1. Login
-curl -X POST https://localhost:8443/api/auth/login \
+curl -X POST https://localhost:8080/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username": "user", "password": "pass"}'
 
@@ -451,11 +451,11 @@ curl -X POST https://localhost:8443/api/auth/login \
 }
 
 # 2. Use token to get data
-curl -X GET https://localhost:8443/api/data \
+curl -X GET https://localhost:8080/api/data \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIs..."
 
 # 3. Refresh token before expiry
-curl -X POST https://localhost:8443/api/auth/refresh \
+curl -X POST https://localhost:8080/api/auth/refresh \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIs..."
 ```
 
@@ -465,7 +465,7 @@ import requests
 import json
 
 class WeatherStationClient:
-    def __init__(self, base_url="https://localhost:8443/api"):
+    def __init__(self, base_url="https://localhost:8080/api"):
         self.base_url = base_url
         self.token = None
     
@@ -503,7 +503,7 @@ if client.login("user", "password"):
 // Login and get data
 async function getWeatherData() {
     // Login
-    const loginResponse = await fetch('https://localhost:8443/api/auth/login', {
+    const loginResponse = await fetch('https://localhost:8080/api/auth/login', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
@@ -515,7 +515,7 @@ async function getWeatherData() {
     const {token} = await loginResponse.json();
     
     // Get data
-    const dataResponse = await fetch('https://localhost:8443/api/data', {
+    const dataResponse = await fetch('https://localhost:8080/api/data', {
         headers: {'Authorization': `Bearer ${token}`}
     });
     
@@ -561,13 +561,13 @@ def safe_api_call(url, token):
 ### 9.1 Health Check
 ```bash
 # No auth required
-curl https://localhost:8443/api/status
+curl https://localhost:8080/api/status
 ```
 
 ### 9.2 Test Authentication
 ```bash
 # Test with wrong credentials
-curl -X POST https://localhost:8443/api/auth/login \
+curl -X POST https://localhost:8080/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username": "wrong", "password": "wrong"}'
 # Should return 401
@@ -577,7 +577,7 @@ curl -X POST https://localhost:8443/api/auth/login \
 ```bash
 # Send multiple requests quickly
 for i in {1..10}; do
-  curl -X GET https://localhost:8443/api/data \
+  curl -X GET https://localhost:8080/api/data \
     -H "Authorization: Bearer [token]"
 done
 # Should get 429 after limit

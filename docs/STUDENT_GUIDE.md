@@ -960,7 +960,7 @@ grep "boot_verification" logs/weather_station.log
 #### 2. Encryption Tests
 ```bash
 # Test with Wireshark
-sudo tcpdump -i any -w capture.pcap port 8443
+sudo tcpdump -i any -w capture.pcap port 8080
 
 # Verify no plaintext data is visible
 wireshark capture.pcap
@@ -969,7 +969,7 @@ wireshark capture.pcap
 #### 3. Authentication Tests
 ```python
 # Test invalid token
-curl -X GET https://localhost:8443/api/data \
+curl -X GET https://localhost:8080/api/data \
   -H "Authorization: Bearer invalid_token"
 # Should return 401 Unauthorized
 

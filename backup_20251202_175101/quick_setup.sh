@@ -448,7 +448,7 @@ echo "  Weather Station - Starting"
 echo "======================================"
 echo "Platform: $(lsb_release -d 2>/dev/null | cut -f2- || uname -s)"
 echo "Simulation Mode: ${SENSOR_SIMULATION:-auto}"
-echo "API URL: https://localhost:${API_PORT:-8443}"
+echo "API URL: https://localhost:${API_PORT:-8080}"
 echo "======================================"
 echo ""
 echo "Press Ctrl+C to stop"
@@ -663,7 +663,7 @@ Once started, access the Weather Station API at:
 Edit `.env` to customize:
 - `SECRET_KEY` - Flask secret key (auto-generated)
 - `JWT_SECRET_KEY` - JWT token secret (auto-generated)
-- `API_PORT` - API port (default: 8443)
+- `API_PORT` - API port (default: 8080)
 - `SENSOR_SIMULATION` - true/false
 - `LOG_LEVEL` - DEBUG, INFO, WARNING, ERROR
 
@@ -671,7 +671,7 @@ Edit `.env` to customize:
 
 ### Port Already in Use
 ```bash
-sudo lsof -i :8443
+sudo lsof -i :8080
 # Kill the process if needed
 ```
 

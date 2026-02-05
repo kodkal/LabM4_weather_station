@@ -71,7 +71,7 @@ Should see:
 ======================================
 Platform: Ubuntu 20.04.1 LTS
 Simulation Mode: true
-API URL: https://localhost:8443
+API URL: https://localhost:8080
 ======================================
 ```
 
@@ -81,7 +81,7 @@ API URL: https://localhost:8443
 
 Open your browser:
 ```
-https://localhost:8443
+https://localhost:8080
 ```
 
 **Note:** You'll see a security warning (self-signed certificate). This is expected!
@@ -159,10 +159,10 @@ A: YES! 100% of the lab objectives can be achieved in simulation mode.
 **Q: How do I know if I'm in simulation mode?**  
 A: Check your `.env` file: `SENSOR_SIMULATION=true` means simulation mode.
 
-**Q: The API won't start, port 8443 in use?**  
+**Q: The API won't start, port 8080 in use?**  
 A: Kill the existing process:
 ```bash
-sudo lsof -i :8443
+sudo lsof -i :8080
 # Note the PID, then:
 sudo kill <PID>
 ```
@@ -256,7 +256,7 @@ Before starting the security work:
 - [ ] Setup script completed without errors
 - [ ] Onboarding completed
 - [ ] Weather station starts successfully
-- [ ] Can access https://localhost:8443
+- [ ] Can access https://localhost:8080
 - [ ] API responds to requests
 - [ ] No Python import errors
 - [ ] Simulation mode is working (if on Ubuntu)

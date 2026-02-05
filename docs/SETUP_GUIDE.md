@@ -271,10 +271,10 @@ sudo systemctl status weather-station
 ### 5.5 Accessing the API
 ```bash
 # Local access
-curl https://localhost:8443/api/status
+curl https://localhost:8080/api/status
 
 # Remote access
-curl https://[PI_IP]:8443/api/status
+curl https://[PI_IP]:8080/api/status
 ```
 
 ---

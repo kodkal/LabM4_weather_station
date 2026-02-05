@@ -280,7 +280,7 @@ configure_environment() {
 SECRET_KEY=change-this-to-a-secure-random-key
 JWT_SECRET_KEY=change-this-to-another-secure-key
 FLASK_ENV=development
-API_PORT=8443
+API_PORT=8080
 SENSOR_SIMULATION=false
 LOG_LEVEL=INFO
 EOF
@@ -449,7 +449,7 @@ echo "  Weather Station - Starting"
 echo "======================================"
 echo "Platform: $(lsb_release -d 2>/dev/null | cut -f2- || uname -s)"
 echo "Simulation Mode: ${SENSOR_SIMULATION:-auto}"
-echo "API URL: https://localhost:${API_PORT:-8443}"
+echo "API URL: https://localhost:${API_PORT:-8080}"
 echo "======================================"
 echo ""
 echo "Press Ctrl+C to stop"
@@ -656,7 +656,7 @@ EOF
 ## API Access
 
 Once started, access the Weather Station API at:
-- **URL:** https://localhost:8443
+- **URL:** https://localhost:8080
 - **Certificate:** Self-signed (you'll see a security warning - this is expected)
 
 ## Environment Variables
@@ -664,7 +664,7 @@ Once started, access the Weather Station API at:
 Edit `.env` to customize:
 - `SECRET_KEY` - Flask secret key (auto-generated)
 - `JWT_SECRET_KEY` - JWT token secret (auto-generated)
-- `API_PORT` - API port (default: 8443)
+- `API_PORT` - API port (default: 8080)
 - `SENSOR_SIMULATION` - true/false
 - `LOG_LEVEL` - DEBUG, INFO, WARNING, ERROR
 
@@ -672,7 +672,7 @@ Edit `.env` to customize:
 
 ### Port Already in Use
 ```bash
-sudo lsof -i :8443
+sudo lsof -i :8080
 # Kill the process if needed
 ```
 
@@ -769,7 +769,7 @@ display_next_steps() {
     echo "  • Run ./setup/student_onboard.sh to personalize your setup"
     echo "  • Read PLATFORM_SETUP.md for detailed instructions"
     echo "  • Check docs/ folder for lab guides"
-    echo "  • API will be available at: https://localhost:8443"
+    echo "  • API will be available at: https://localhost:8080"
     echo
     echo -e "${GREEN}Ready to start Module 4! 🚀${NC}"
     echo

@@ -562,7 +562,7 @@ Platform Guide: PLATFORM_SETUP.md
 
 API ACCESS:
 ----------
-URL: https://localhost:8443
+URL: https://localhost:8080
 Default credentials (CHANGE THESE!):
   Username: admin
   Password: admin123
@@ -624,7 +624,7 @@ BEGINNER HINTS - Getting Started:
 STEP 1: UNDERSTAND THE SYSTEM
 -----------------------------
 1. Start the weather station: ./start_weather_station.sh
-2. Visit: https://localhost:8443
+2. Visit: https://localhost:8080
 3. Try to login (hint: check the code for default credentials)
 4. Explore the API endpoints
 
@@ -1014,7 +1014,7 @@ echo -e "  ${GREEN}1. Start the weather station:${NC}"
 echo "     ./start_weather_station.sh"
 echo
 echo -e "  ${GREEN}2. Access the API:${NC}"
-echo "     https://localhost:8443"
+echo "     https://localhost:8080"
 echo
 echo -e "  ${GREEN}3. Run security tests:${NC}"
 echo "     ./test_security.sh"

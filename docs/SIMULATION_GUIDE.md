@@ -175,7 +175,7 @@ export SENSOR_SIMULATION=true
 export DEBUG=true
 python weather_station.py
 
-# 5. Access API at https://localhost:8443
+# 5. Access API at https://localhost:8080
 ```
 
 ### Testing Security Features
@@ -345,14 +345,14 @@ malicious_data = {
 ### Test Encryption
 ```bash
 # Capture traffic to verify encryption
-tcpdump -i lo -w capture.pcap port 8443
+tcpdump -i lo -w capture.pcap port 8080
 # Simulated data is encrypted the same way
 ```
 
 ### Test Authentication
 ```bash
 # API security works identically
-curl -X GET https://localhost:8443/api/data
+curl -X GET https://localhost:8080/api/data
 # Should require JWT token regardless of data source
 ```
 
