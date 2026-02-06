@@ -387,7 +387,8 @@ def main():
     weather_station = VulnerableWeatherStation()
     
     # VULN-76: HTTP instead of HTTPS
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    app.run(host='0.0.0.0', port=8080, debug=True,
+        ssl_context=('keys/certificate.crt', 'keys/private.key'))
 
 
 if __name__ == "__main__":
